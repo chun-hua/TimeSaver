@@ -1,0 +1,677 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Steve Jobs · 粒子叙事</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700&family=Noto+Sans+SC:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { width: 100%; height: 100%; overflow: hidden; background: #0a0a0c; }
+  body {
+    /* 系统中文字体优先；Google Fonts 作为增强（需 HTTP 服务） */
+    font-family:
+      'Songti SC', 'STSongti', 'Noto Serif CJK SC', 'Source Han Serif SC',
+      'SimSun', 'NSimSun', 'FangSong', 'STFangsong',
+      'Noto Serif SC', serif;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    user-select: none; -webkit-user-select: none;
+  }
+
+  .stage-container {
+    position: absolute; top: 0; left: 0; right: 0; bottom: 0;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    z-index: 2; pointer-events: none;
+  }
+
+  /* ── 上部：主金句 ── */
+  .quote-block {
+    position: absolute; top: 5vh; left: 50%; transform: translateX(-50%);
+    text-align: center; max-width: 85vw;
+    opacity: 0; transition: opacity 1.2s ease, transform 1s ease;
+    transform: translateX(-50%) translateY(12px);
+  }
+  .quote-block.active { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .quote-chinese {
+    font-family: 'Songti SC', 'STSongti', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif;
+    font-weight: 600; font-size: clamp(1.3rem, 3.2vw, 2.2rem);
+    color: #f0ebe0; letter-spacing: 0.06em; line-height: 1.55;
+    text-shadow: 0 0 60px rgba(240,235,224,0.18);
+    margin-bottom: 0.35em;
+  }
+
+  .quote-english {
+    font-family: 'Songti SC', 'STSongti', 'Noto Serif CJK SC', 'Source Han Serif SC', 'SimSun', serif;
+    font-weight: 300; font-size: clamp(0.75rem, 1.6vw, 1.05rem);
+    color: rgba(210,200,180,0.65); font-style: italic; letter-spacing: 0.03em;
+    margin-bottom: 0.6em;
+  }
+
+  .quote-context {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300; font-size: clamp(0.6rem, 1.15vw, 0.78rem);
+    color: rgba(180,170,155,0.45); letter-spacing: 0.08em;
+  }
+
+  /* ── 下部：阶段指示器 ── */
+  .stage-indicator {
+    position: absolute; bottom: 6vh; left: 50%; transform: translateX(-50%);
+    display: flex; gap: 10px; align-items: center;
+    opacity: 0; transition: opacity 1s ease;
+  }
+  .stage-indicator.visible { opacity: 1; }
+
+  .stage-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: rgba(180,170,155,0.25); transition: all 0.7s ease;
+  }
+  .stage-dot.current {
+    background: rgba(240,225,195,0.85);
+    box-shadow: 0 0 12px rgba(240,225,195,0.5), 0 0 24px rgba(240,225,195,0.2);
+    width: 10px; height: 10px;
+  }
+  .stage-dot.past { background: rgba(180,170,155,0.12); }
+
+  .stage-name {
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300; font-size: clamp(0.55rem, 1.1vw, 0.72rem);
+    color: rgba(180,170,155,0.55); letter-spacing: 0.1em;
+    margin-left: 6px;
+    transition: color 0.7s ease;
+  }
+  .stage-name.active { color: rgba(240,225,195,0.75); }
+
+  /* ── 画布 ── */
+  canvas {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    z-index: 1;
+  }
+
+  /* 点击提示 */
+  .hint {
+    position: absolute; bottom: 14vh; left: 50%; transform: translateX(-50%);
+    font-family: 'Noto Sans SC', sans-serif;
+    font-weight: 300; font-size: 0.65rem; color: rgba(150,140,130,0.3);
+    letter-spacing: 0.08em; z-index: 3; pointer-events: none;
+    opacity: 0; transition: opacity 0.8s ease;
+  }
+  .hint.show { opacity: 1; }
+</style>
+</head>
+<body>
+
+<canvas id="c"></canvas>
+
+<div class="stage-container" id="stageContainer">
+  <div class="quote-block active" id="quoteBlock"></div>
+  <div class="stage-indicator visible" id="stageIndicator"></div>
+</div>
+
+<div class="hint show" id="hint">点击任意位置 或 等待自动演进</div>
+
+<script>
+// ═════════════════════════════════════════════════════════
+//  Steve Jobs · 粒子叙事 — 8阶段自动演变
+//  基于女娲Skill蒸馏的乔布斯思维框架
+// ═════════════════════════════════════════════════════════
+
+const canvas = document.getElementById('c');
+const ctx = canvas.getContext('2d');
+
+// ── 8个阶段的定义 ──
+const STAGES = [
+  {
+    id: 'beginner',
+    name: '初心',
+    chinese: 'Stay Hungry. Stay Foolish.',
+    english: '求知若饥，虚心若愚。',
+    context: '1972 · Reed College 辍学，旁听书法课 — 跟随好奇心，不问用处',
+    tint: [220, 210, 180],  // warm parchment
+  },
+  {
+    id: 'dots',
+    name: '连线',
+    chinese: '你无法前瞻地连接人生的点，',
+    english: 'You can\'t connect the dots looking forward.',
+    context: '只能回溯地理解它们。相信那些点终将以某种方式连接。',
+    tint: [180, 200, 230],  // sky blue
+  },
+  {
+    id: 'apple',
+    name: '聚焦',
+    chinese: '聚焦不是对你想做的事说Yes，',
+    english: 'Focus is saying no to the hundred other good ideas.',
+    context: '1997 · 回归Apple — 350个产品砍到10个。创新就是对一千件事说不。',
+    tint: [230, 180, 170],  // warm rose
+  },
+  {
+    id: 'venn',
+    name: '交汇',
+    chinese: '仅有技术是不够的。',
+    english: 'Technology alone is not enough.',
+    context: '2007 · iPhone — 技术必须与人文结合，才能让心灵歌唱。',
+    tint: [170, 210, 220],  // teal
+  },
+  {
+    id: 'force',
+    name: '力场',
+    chinese: '只有那些疯狂到认为自己能改变世界的人，',
+    english: 'The people who are crazy enough to think they can change the world...',
+    context: 'Think Different · 用现实扭曲力场让不可能成为可能。',
+    tint: [200, 170, 230],  // violet
+  },
+  {
+    id: 'phoenix',
+    name: '涅槃',
+    chinese: '被Apple开除是我一生中最好的事。',
+    english: 'Getting fired from Apple was the best thing that could have ever happened to me.',
+    context: '1985 被逐 → NeXT → Pixar → 1997 王者归来。毁灭是重生的入口。',
+    tint: [240, 190, 130],  // flame gold
+  },
+  {
+    id: 'death',
+    name: '死亡',
+    chinese: '如果你把每一天都当作生命最后一天来过，',
+    english: 'If you live each day as if it was your last...',
+    context: '2005 · Stanford — 死亡是生命最好的发明。用它做决策工具。',
+    tint: [210, 200, 240],  // twilight
+  },
+  {
+    id: 'path',
+    name: '前行',
+    chinese: '你的时间有限，不要浪费在活成别人的样子上。',
+    english: 'Your time is limited. Don\'t waste it living someone else\'s life.',
+    context: '1955–2011 · 「Oh wow. Oh wow. Oh wow.」— 故事未完，路在前方。',
+    tint: [240, 225, 195],  // luminous ivory
+  },
+];
+
+// ── Canvas 尺寸 ──
+let W, H, S, CX, CY;
+function resize() {
+  const dpr = Math.min(window.devicePixelRatio || 1, 2);
+  W = window.innerWidth * dpr;
+  H = window.innerHeight * dpr;
+  canvas.width = W;
+  canvas.height = H;
+  S = Math.min(W, H) * 0.62;  // particle square size
+  CX = W / 2;
+  CY = H / 2;
+}
+resize();
+window.addEventListener('resize', resize);
+
+// ── 粒子定义 ──
+const N = 460;
+
+// Shape primitive helper
+function p(type, config) {
+  return { type, ...config };
+}
+
+// ══════════════════════════════════════════════
+//  8 个粒子形状定义
+// ══════════════════════════════════════════════
+
+function buildShapes(tint) {
+  const [R, G, B] = tint;
+
+  return [
+    // ── 0: 初心 · 散点云团（未成形的潜能）──
+    [
+      p('s', { x: 0.5, y: 0.5, rx: 0.32, ry: 0.30, n: 280, c: tint, a: 0.38 }),
+      p('s', { x: 0.5, y: 0.5, rx: 0.18, ry: 0.16, n: 120, c: tint, a: 0.55 }),
+      p('s', { x: 0.5, y: 0.5, rx: 0.08, ry: 0.07, n: 60,  c: [R+20,G+20,B+20], a: 0.7 }),
+    ],
+
+    // ── 1: 连线 · 散点+连线 ──
+    [
+      // Scattered nodes
+      p('s', { x: 0.28, y: 0.32, rx: 0.08, ry: 0.07, n: 40, c: tint, a: 0.65 }),
+      p('s', { x: 0.62, y: 0.24, rx: 0.07, ry: 0.06, n: 35, c: tint, a: 0.6 }),
+      p('s', { x: 0.44, y: 0.58, rx: 0.09, ry: 0.08, n: 45, c: tint, a: 0.65 }),
+      p('s', { x: 0.72, y: 0.55, rx: 0.06, ry: 0.05, n: 30, c: tint, a: 0.55 }),
+      p('s', { x: 0.20, y: 0.65, rx: 0.07, ry: 0.06, n: 35, c: tint, a: 0.55 }),
+      p('s', { x: 0.55, y: 0.38, rx: 0.06, ry: 0.05, n: 30, c: tint, a: 0.6 }),
+      // Connecting lines
+      p('l', { x1: 0.28, y1: 0.32, x2: 0.55, y2: 0.38, w: 0.004, n: 30, c: [R+30,G+30,B+30], a: 0.5 }),
+      p('l', { x1: 0.55, y1: 0.38, x2: 0.62, y2: 0.24, w: 0.004, n: 25, c: [R+30,G+30,B+30], a: 0.45 }),
+      p('l', { x1: 0.55, y1: 0.38, x2: 0.44, y2: 0.58, w: 0.004, n: 30, c: [R+30,G+30,B+30], a: 0.5 }),
+      p('l', { x1: 0.44, y1: 0.58, x2: 0.72, y2: 0.55, w: 0.004, n: 25, c: [R+30,G+30,B+30], a: 0.45 }),
+      p('l', { x1: 0.44, y1: 0.58, x2: 0.20, y2: 0.65, w: 0.004, n: 30, c: [R+30,G+30,B+30], a: 0.45 }),
+      p('l', { x1: 0.28, y1: 0.32, x2: 0.62, y2: 0.24, w: 0.003, n: 20, c: [R+20,G+20,B+20], a: 0.35 }),
+    ],
+
+    // ── 2: 苹果 · 被咬一口的苹果 ──
+    [
+      // Left arc (full apple body)
+      p('arc', { x: 0.495, y: 0.55, rx: 0.23, ry: 0.27, a0: 4.7, a1: 9.5, t: 0.06, n: 180, c: tint, a: 0.7, rot: 0 }),
+      // Right arc (bite side - narrower to simulate bite mark)
+      p('arc', { x: 0.505, y: 0.55, rx: 0.14, ry: 0.27, a0: 9.3, a1: 4.9, t: 0.05, n: 120, c: tint, a: 0.6, rot: 0 }),
+      // Stem
+      p('l', { x1: 0.5, y1: 0.305, x2: 0.5, y2: 0.22, w: 0.005, n: 28, c: tint, a: 0.7 }),
+      // Leaf
+      p('arc', { x: 0.5, y: 0.24, rx: 0.06, ry: 0.03, a0: 1.2, a1: 5.0, t: 0.015, n: 40, c: [R+30,G+30,B+15], a: 0.65 }),
+      // Core glow
+      p('e', { x: 0.5, y: 0.52, rx: 0.10, ry: 0.12, n: 80, c: [R+40,G+40,B+40], a: 0.25 }),
+    ],
+
+    // ── 3: 交汇 · 科技×人文（两个重叠光环）──
+    [
+      // Left ring (technology)
+      p('r', { x: 0.40, y: 0.50, rx: 0.20, ry: 0.20, t: 0.025, n: 140, c: [170,210,230], a: 0.6 }),
+      // Right ring (humanities)
+      p('r', { x: 0.60, y: 0.50, rx: 0.20, ry: 0.20, t: 0.025, n: 140, c: [230,200,170], a: 0.6 }),
+      // Intersection glow
+      p('e', { x: 0.50, y: 0.50, rx: 0.08, ry: 0.14, n: 80, c: [240,225,195], a: 0.5 }),
+      // Radiating particles from center
+      p('s', { x: 0.50, y: 0.50, rx: 0.06, ry: 0.06, n: 80, c: [255,240,210], a: 0.4 }),
+    ],
+
+    // ── 4: 力场 · 同心环+放射线 ──
+    [
+      // Concentric rings
+      p('r', { x: 0.5, y: 0.5, rx: 0.10, ry: 0.10, t: 0.012, n: 50, c: tint, a: 0.7 }),
+      p('r', { x: 0.5, y: 0.5, rx: 0.18, ry: 0.18, t: 0.014, n: 70, c: tint, a: 0.55 }),
+      p('r', { x: 0.5, y: 0.5, rx: 0.27, ry: 0.27, t: 0.014, n: 90, c: tint, a: 0.35 }),
+      p('r', { x: 0.5, y: 0.5, rx: 0.36, ry: 0.36, t: 0.012, n: 100, c: tint, a: 0.18 }),
+      // Radiating lines
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.5, y2: 0.08, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.72, y2: 0.18, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.88, y2: 0.50, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.72, y2: 0.82, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.5, y2: 0.92, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.28, y2: 0.82, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.12, y2: 0.50, w: 0.004, n: 22, c: tint, a: 0.5 }),
+      p('l', { x1: 0.5, y1: 0.5, x2: 0.28, y2: 0.18, w: 0.004, n: 22, c: tint, a: 0.5 }),
+    ],
+
+    // ── 5: 涅槃 · 凤凰展翅 ──
+    [
+      // Outer wings
+      p('arc', { x: 0.5, y: 0.55, rx: 0.30, ry: 0.20, a0: 3.2, a1: 6.1, t: 0.05, n: 130, c: tint, a: 0.6 }),
+      p('arc', { x: 0.5, y: 0.55, rx: 0.30, ry: 0.20, a0: 0.0, a1: 3.1, t: 0.05, n: 130, c: tint, a: 0.6 }),
+      // Inner wings
+      p('arc', { x: 0.5, y: 0.55, rx: 0.17, ry: 0.11, a0: 3.3, a1: 6.0, t: 0.04, n: 80, c: [R+30,G+30,B+30], a: 0.65 }),
+      p('arc', { x: 0.5, y: 0.55, rx: 0.17, ry: 0.11, a0: 0.0, a1: 3.0, t: 0.04, n: 80, c: [R+30,G+30,B+30], a: 0.65 }),
+      // Core body / fuselage
+      p('e', { x: 0.5, y: 0.52, rx: 0.04, ry: 0.16, n: 70, c: [R+40,G+40,B+30], a: 0.7 }),
+      // Rising particles
+      p('s', { x: 0.5, y: 0.35, rx: 0.10, ry: 0.08, n: 50, c: tint, a: 0.3 }),
+    ],
+
+    // ── 6: 死亡 · 沙漏 ──
+    [
+      // Top glass bulb
+      p('e', { x: 0.5, y: 0.38, rx: 0.14, ry: 0.16, n: 90, c: tint, a: 0.5 }),
+      p('arc', { x: 0.5, y: 0.38, rx: 0.14, ry: 0.16, a0: 0, a1: 6.283, t: 0.02, n: 70, c: tint, a: 0.6 }),
+      // Bottom glass bulb
+      p('e', { x: 0.5, y: 0.64, rx: 0.14, ry: 0.16, n: 90, c: tint, a: 0.5 }),
+      p('arc', { x: 0.5, y: 0.64, rx: 0.14, ry: 0.16, a0: 0, a1: 6.283, t: 0.02, n: 70, c: tint, a: 0.6 }),
+      // Waist (narrow center)
+      p('l', { x1: 0.44, y1: 0.48, x2: 0.44, y2: 0.56, w: 0.003, n: 15, c: tint, a: 0.5 }),
+      p('l', { x1: 0.56, y1: 0.48, x2: 0.56, y2: 0.56, w: 0.003, n: 15, c: tint, a: 0.5 }),
+      // Sand flowing through waist
+      p('e', { x: 0.5, y: 0.52, rx: 0.03, ry: 0.04, n: 40, c: [R+50,G+50,B+40], a: 0.7 }),
+      // Sand in bottom
+      p('e', { x: 0.5, y: 0.68, rx: 0.10, ry: 0.04, n: 60, c: tint, a: 0.55 }),
+      // Top rim
+      p('r', { x: 0.5, y: 0.26, rx: 0.16, ry: 0.02, t: 0.008, n: 40, c: tint, a: 0.5 }),
+      // Bottom rim
+      p('r', { x: 0.5, y: 0.78, rx: 0.16, ry: 0.02, t: 0.008, n: 40, c: tint, a: 0.5 }),
+    ],
+
+    // ── 7: 前行 · 分岔路 ──
+    [
+      // Central path stem rising
+      p('l', { x1: 0.5, y1: 0.78, x2: 0.5, y2: 0.45, w: 0.015, n: 60, c: tint, a: 0.65 }),
+      // Left fork
+      p('l', { x1: 0.5, y1: 0.45, x2: 0.28, y2: 0.18, w: 0.012, n: 50, c: tint, a: 0.55 }),
+      // Right fork
+      p('l', { x1: 0.5, y1: 0.45, x2: 0.68, y2: 0.14, w: 0.012, n: 50, c: tint, a: 0.55 }),
+      // Center upward continuation
+      p('l', { x1: 0.5, y1: 0.45, x2: 0.5, y2: 0.08, w: 0.008, n: 35, c: [R+40,G+40,B+40], a: 0.45 }),
+      // Glow at fork point
+      p('e', { x: 0.5, y: 0.45, rx: 0.05, ry: 0.05, n: 60, c: [R+50,G+50,B+50], a: 0.6 }),
+      // Particles along the paths
+      p('s', { x: 0.30, y: 0.22, rx: 0.04, ry: 0.04, n: 25, c: tint, a: 0.4 }),
+      p('s', { x: 0.66, y: 0.18, rx: 0.04, ry: 0.04, n: 25, c: tint, a: 0.4 }),
+      p('s', { x: 0.5, y: 0.12, rx: 0.03, ry: 0.03, n: 20, c: [R+40,G+40,B+40], a: 0.35 }),
+      // Horizon glow
+      p('s', { x: 0.5, y: 0.80, rx: 0.30, ry: 0.04, n: 60, c: tint, a: 0.2 }),
+    ],
+  ];
+}
+
+// ══════════════════════════════════════════════
+//  采样引擎
+// ══════════════════════════════════════════════
+
+function rand() { return Math.random(); }
+function randRange(a, b) { return a + rand() * (b - a); }
+
+function sampleShape(shapes, totalN) {
+  const totalPrim = shapes.reduce((s, p) => s + p.n, 0);
+  if (totalPrim === 0) { console.warn('Empty shape'); return []; }
+
+  const particles = [];
+  for (const prim of shapes) {
+    const count = Math.round(totalN * prim.n / totalPrim);
+    const color = prim.c || [220, 220, 220];
+    const alpha = prim.a || 0.7;
+
+    switch (prim.type) {
+      case 'e': {  // filled ellipse
+        for (let i = 0; i < count; i++) {
+          const r = Math.sqrt(rand());
+          const angle = rand() * Math.PI * 2;
+          particles.push({
+            nx: prim.x + r * Math.cos(angle) * prim.rx,
+            ny: prim.y + r * Math.sin(angle) * prim.ry,
+            r: color[0], g: color[1], b: color[2], a: alpha,
+          });
+        }
+        break;
+      }
+      case 'r': {  // ring
+        for (let i = 0; i < count; i++) {
+          const angle = rand() * Math.PI * 2;
+          const halfT = prim.t / 2;
+          const dist = 1.0 + randRange(-halfT, halfT);
+          particles.push({
+            nx: prim.x + dist * Math.cos(angle) * prim.rx,
+            ny: prim.y + dist * Math.sin(angle) * prim.ry,
+            r: color[0], g: color[1], b: color[2], a: alpha,
+          });
+        }
+        break;
+      }
+      case 'l': {  // line
+        for (let i = 0; i < count; i++) {
+          const t = rand();
+          const nx = prim.x1 + t * (prim.x2 - prim.x1) + randRange(-prim.w/2, prim.w/2);
+          const ny = prim.y1 + t * (prim.y2 - prim.y1) + randRange(-prim.w/2, prim.w/2);
+          particles.push({ nx, ny, r: color[0], g: color[1], b: color[2], a: alpha });
+        }
+        break;
+      }
+      case 'arc': {  // arc segment
+        for (let i = 0; i < count; i++) {
+          const angle = randRange(prim.a0, prim.a1);
+          const halfT = prim.t / 2;
+          const dist = 1.0 + randRange(-halfT, halfT);
+          particles.push({
+            nx: prim.x + dist * Math.cos(angle) * prim.rx,
+            ny: prim.y + dist * Math.sin(angle) * prim.ry,
+            r: color[0], g: color[1], b: color[2], a: alpha,
+          });
+        }
+        break;
+      }
+      case 's': {  // scatter (rim-biased)
+        for (let i = 0; i < count; i++) {
+          const angle = rand() * Math.PI * 2;
+          const r = 0.5 + 0.55 * rand();
+          particles.push({
+            nx: prim.x + r * Math.cos(angle) * prim.rx,
+            ny: prim.y + r * Math.sin(angle) * prim.ry,
+            r: color[0], g: color[1], b: color[2], a: alpha,
+          });
+        }
+        break;
+      }
+    }
+  }
+  // Ensure exactly totalN particles
+  while (particles.length > totalN) particles.pop();
+  while (particles.length < totalN) {
+    const i = Math.floor(rand() * particles.length);
+    particles.push({ ...particles[i] });
+  }
+  return particles;
+}
+
+// ══════════════════════════════════════════════
+//  粒子系统
+// ══════════════════════════════════════════════
+
+let curStage = 0;
+let nextStage = 0;  // target
+let morphStart = 0;
+let particles = [];
+let isMorphing = false;
+
+const MORPH_MS = 2800;
+const HOLD_MS = 3800;
+
+function initParticles() {
+  const shapes = buildShapes(STAGES[0].tint);
+  const target = sampleShape(shapes[0], N);
+  particles = target.map(t => ({
+    nx: t.nx, ny: t.ny,
+    tnx: t.nx, tny: t.ny,
+    r: t.r, g: t.g, b: t.b, a: t.a,
+    tr: t.r, tg: t.g, tb: t.b, ta: t.a,
+    seed: rand() * Math.PI * 2,
+  }));
+}
+
+function morphToStage(idx) {
+  const shapes = buildShapes(STAGES[idx].tint);
+  const target = sampleShape(shapes[idx], N);
+  for (let i = 0; i < particles.length && i < target.length; i++) {
+    const p = particles[i], t = target[i];
+    p.tnx = t.nx; p.tny = t.ny;
+    p.tr = t.r; p.tg = t.g; p.tb = t.b; p.ta = t.a;
+    // Save source colors
+    p.sr = p.r; p.sg = p.g; p.sb = p.b; p.sa = p.a;
+  }
+  nextStage = idx;
+  morphStart = performance.now();
+  isMorphing = true;
+}
+
+// ══════════════════════════════════════════════
+//  渲染
+// ══════════════════════════════════════════════
+
+function ease(t) { return t < 0.5 ? 2*t*t : -1+(4-2*t)*t; }
+
+function draw(now) {
+  ctx.clearRect(0, 0, W, H);
+
+  // Background glow
+  const stage = STAGES[curStage];
+  const tint = stage.tint.join(',');
+  const pulse = 1 + Math.sin(now * 0.0004) * 0.05;
+  const boxCX = CX;
+  const boxCY = CY;
+  const boxS = S * 0.85;
+  const bgGrad = ctx.createRadialGradient(boxCX, boxCY, boxS * 0.08, boxCX, boxCY, boxS * 0.55);
+  bgGrad.addColorStop(0, `rgba(${tint},${0.07 * pulse})`);
+  bgGrad.addColorStop(0.5, `rgba(${tint},${0.02 * pulse})`);
+  bgGrad.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = bgGrad;
+  ctx.fillRect(0, 0, W, H);
+
+  // Update particle positions
+  if (isMorphing) {
+    const elapsed = now - morphStart;
+    const rawT = Math.min(elapsed / MORPH_MS, 1.0);
+    const t = ease(rawT);
+
+    for (const p of particles) {
+      p.nx = p.sx + (p.tnx - p.sx) * t;
+      p.ny = p.sy + (p.tny - p.sy) * t;
+      p.r = p.sr + (p.tr - p.sr) * t;
+      p.g = p.sg + (p.tg - p.sg) * t;
+      p.b = p.sb + (p.tb - p.sb) * t;
+      p.a = p.sa + (p.ta - p.sa) * t;
+    }
+
+    if (rawT >= 1.0) {
+      // Snap
+      for (const p of particles) {
+        p.nx = p.tnx; p.ny = p.tny;
+        p.r = p.tr; p.g = p.tg; p.b = p.tb; p.a = p.ta;
+      }
+      curStage = nextStage;
+      isMorphing = false;
+      // Trigger quote transition
+      updateUI(curStage);
+    }
+  }
+
+  // Draw particles
+  ctx.globalCompositeOperation = 'lighter';
+  const box = Math.min(W, H) * 0.62;
+  const bx = (W - box) / 2;
+  const by = (H - box) / 2;
+
+  for (const p of particles) {
+    const px = bx + p.nx * box;
+    const py = by + p.ny * box;
+    const driftX = Math.sin(now * 0.0012 + p.seed) * 1.6;
+    const driftY = Math.cos(now * 0.00085 + p.seed * 1.4) * 1.6;
+    const x = px + driftX;
+    const y = py + driftY;
+
+    // Outer halo
+    ctx.beginPath();
+    ctx.arc(x, y, 5.5, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${Math.round(p.r)},${Math.round(p.g)},${Math.round(p.b)},${(p.a*0.05*pulse).toFixed(3)})`;
+    ctx.fill();
+
+    // Medium glow
+    ctx.beginPath();
+    ctx.arc(x, y, 2.8, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${Math.round(p.r)},${Math.round(p.g)},${Math.round(p.b)},${(p.a*0.16*pulse).toFixed(3)})`;
+    ctx.fill();
+
+    // Bright core
+    ctx.beginPath();
+    ctx.arc(x, y, 1.1, 0, Math.PI * 2);
+    ctx.fillStyle = `rgba(${Math.round(Math.min(p.r*1.1,255))},${Math.round(Math.min(p.g*1.1,255))},${Math.round(Math.min(p.b*1.1,255))},${(p.a*0.88*pulse).toFixed(3)})`;
+    ctx.fill();
+  }
+  ctx.globalCompositeOperation = 'source-over';
+}
+
+// ══════════════════════════════════════════════
+//  UI 更新
+// ══════════════════════════════════════════════
+
+const quoteBlock = document.getElementById('quoteBlock');
+const stageIndicator = document.getElementById('stageIndicator');
+const hint = document.getElementById('hint');
+
+function buildStageDots() {
+  let html = '';
+  for (let i = 0; i < STAGES.length; i++) {
+    if (i < curStage) html += '<span class="stage-dot past"></span>';
+    else if (i === curStage) html += '<span class="stage-dot current"></span>';
+    else html += '<span class="stage-dot"></span>';
+  }
+  html += `<span class="stage-name active">${STAGES[curStage].name}</span>`;
+  stageIndicator.innerHTML = html;
+}
+
+let quoteTimeout = null;
+
+function updateUI(idx) {
+  // Hide current
+  quoteBlock.classList.remove('active');
+
+  if (quoteTimeout) clearTimeout(quoteTimeout);
+
+  // Show new after brief pause
+  quoteTimeout = setTimeout(() => {
+    const s = STAGES[idx];
+    quoteBlock.innerHTML = `
+      <div class="quote-chinese">${s.chinese}</div>
+      <div class="quote-english">${s.english}</div>
+      <div class="quote-context">${s.context}</div>
+    `;
+    quoteBlock.classList.add('active');
+    buildStageDots();
+  }, 600);
+}
+
+function advanceStage() {
+  const next = (curStage + 1) % STAGES.length;
+  // Save current positions as source for morph
+  for (const p of particles) {
+    p.sx = p.nx; p.sy = p.ny;
+    p.sr = p.r; p.sg = p.g; p.sb = p.b; p.sa = p.a;
+  }
+  morphToStage(next);
+  // Hide hint after first click
+  if (hint.classList.contains('show')) {
+    hint.classList.remove('show');
+  }
+}
+
+// Click to advance
+function userAdvance() {
+  if (isMorphing) return;
+  lastAdvance = performance.now();
+  advanceStage();
+}
+document.addEventListener('click', userAdvance);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
+    userAdvance();
+  }
+});
+
+// Touch
+document.addEventListener('touchstart', e => {
+  e.preventDefault();
+  userAdvance();
+});
+
+// ══════════════════════════════════════════════
+//  自动循环
+// ══════════════════════════════════════════════
+
+let lastAdvance = performance.now();
+let autoAdvanceTimer = null;
+const AUTO_ADVANCE_AFTER_CLICK = 28000;  // 28s after user click
+const AUTO_ADVANCE_INITIAL = 6000;       // 6s initial
+
+function scheduleAutoAdvance() {
+  const now = performance.now();
+  const elapsed = now - lastAdvance;
+  const delay = hint.classList.contains('show') ? AUTO_ADVANCE_INITIAL : AUTO_ADVANCE_AFTER_CLICK;
+
+  if (elapsed >= delay && !isMorphing) {
+    advanceStage();
+    lastAdvance = performance.now();
+  }
+
+  autoAdvanceTimer = requestAnimationFrame(() => {
+    scheduleAutoAdvance();
+  });
+}
+
+// ══════════════════════════════════════════════
+//  主循环
+// ══════════════════════════════════════════════
+
+initParticles();
+buildStageDots();
+updateUI(0);
+lastAdvance = performance.now();
+
+function loop(now) {
+  draw(now);
+  requestAnimationFrame(loop);
+}
+
+scheduleAutoAdvance();
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

@@ -355,7 +355,52 @@
                       >
                         <canvas class="cc-orb" data-comp="munger"></canvas>
                         <span class="cc-name">芒格</span>
-                        <span class="cc-quote">反过来想，总是反过来想</span>
+                        <span class="cc-quote">反过来想</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="feynman"
+                        onclick="pickCompanion('feynman')"
+                      >
+                        <canvas class="cc-orb" data-comp="feynman"></canvas>
+                        <span class="cc-name">费曼</span>
+                        <span class="cc-quote">命名≠理解</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="taleb"
+                        onclick="pickCompanion('taleb')"
+                      >
+                        <canvas class="cc-orb" data-comp="taleb"></canvas>
+                        <span class="cc-name">塔勒布</span>
+                        <span class="cc-quote">Skin in Game</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="musk"
+                        onclick="pickCompanion('musk')"
+                      >
+                        <canvas class="cc-orb" data-comp="musk"></canvas>
+                        <span class="cc-name">马斯克</span>
+                        <span class="cc-quote">第一性原理</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="naval"
+                        onclick="pickCompanion('naval')"
+                      >
+                        <canvas class="cc-orb" data-comp="naval"></canvas>
+                        <span class="cc-name">纳瓦尔</span>
+                        <span class="cc-quote">特定知识</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="pg"
+                        onclick="pickCompanion('pg')"
+                      >
+                        <canvas class="cc-orb" data-comp="pg"></canvas>
+                        <span class="cc-name">PG</span>
+                        <span class="cc-quote">不可规模化</span>
                       </div>
                       <div
                         class="companion-card"
@@ -364,7 +409,7 @@
                       >
                         <canvas class="cc-orb" data-comp="einstein"></canvas>
                         <span class="cc-name">爱因斯坦</span>
-                        <span class="cc-quote">想象力比知识更重要</span>
+                        <span class="cc-quote">想象力</span>
                       </div>
                       <div
                         class="companion-card"
@@ -373,7 +418,25 @@
                       >
                         <canvas class="cc-orb" data-comp="davinci"></canvas>
                         <span class="cc-name">达·芬奇</span>
-                        <span class="cc-quote">简约，是终极的精致</span>
+                        <span class="cc-quote">简约即精致</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="zhangyiming"
+                        onclick="pickCompanion('zhangyiming')"
+                      >
+                        <canvas class="cc-orb" data-comp="zhangyiming"></canvas>
+                        <span class="cc-name">张一鸣</span>
+                        <span class="cc-quote">延迟满足感</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="sunyuchen"
+                        onclick="pickCompanion('sunyuchen')"
+                      >
+                        <canvas class="cc-orb" data-comp="sunyuchen"></canvas>
+                        <span class="cc-name">孙宇晨</span>
+                        <span class="cc-quote">注意力即财富</span>
                       </div>
                     </div>
                   </div>
@@ -385,17 +448,19 @@
                       class="btn-primary"
                       style="
                         width: 100%;
-                        padding: 16px;
+                        padding: 16px 20px;
                         border-radius: 18px;
                         font-size: 15px;
+                        font-weight: 600;
                         display: flex;
                         align-items: center;
                         justify-content: center;
                         gap: 10px;
+                        line-height: 1;
                       "
                     >
-                      <i class="fas fa-play" style="font-size: 12px"></i>
-                      进入专注空间
+                      <i class="fas fa-play" style="font-size: 13px; vertical-align: middle; display: inline-flex; align-items: center;"></i>
+                      <span>进入专注空间</span>
                     </button>
                     <p
                       style="
@@ -443,6 +508,9 @@
               <div class="focus-center" id="focus-center">
                 <div class="companion-stage" id="companion-stage">
                   <canvas id="companion-canvas"></canvas>
+                  <div class="stage-dots" id="stage-dots">
+                    <span class="sdot current"></span><span class="sdot"></span><span class="sdot"></span><span class="sdot"></span><span class="sdot"></span><span class="sdot"></span><span class="sdot"></span><span class="sdot"></span>
+                  </div>
                   <div class="companion-cap">
                     <b id="companion-cap-name">乔布斯</b> 正在陪你专注
                     <div class="companion-quote" id="companion-cap-quote">
@@ -450,19 +518,22 @@
                     </div>
                   </div>
                 </div>
-                <div class="time-block glass-dark anim-float" id="time-block">
-                  <div class="tb-tasklabel">当前任务</div>
-                  <div
-                    class="tb-task"
-                    id="disp-task"
-                    style="margin-bottom: 24px"
-                  >
-                    写论文 introduction
+
+                <div class="time-block glass-dark anim-breathe-card" id="time-block">
+                  <div class="tb-accent"></div>
+                  <div class="tb-task-row">
+                    <div class="tb-task-icon">
+                      <i class="fas fa-feather-pointed"></i>
+                    </div>
+                    <div class="tb-task-info">
+                      <span class="tb-tasklabel">当前专注</span>
+                      <span class="tb-task" id="disp-task">写论文 introduction</span>
+                    </div>
                   </div>
                   <div
                     class="tb-clock"
                     id="focus-clock"
-                    style="margin-bottom: 26px"
+                    style="margin: 22px 0 26px"
                   >
                     50:00
                   </div>
@@ -522,23 +593,24 @@
                     ></i>
                   </div>
                   <h2 class="modal-h">你想离开了吗？</h2>
-                  <p class="modal-p">这是紧急情况吗？</p>
+                  <p class="modal-p">冲动会来，也会走。再给自己一次机会。</p>
                   <div style="display: flex; flex-direction: column; gap: 10px">
                     <button
-                      onclick="emergencyExit()"
-                      class="btn-danger-soft"
+                      onclick="backToFocus()"
+                      class="btn-continue"
                       style="
-                        padding: 14px;
-                        border-radius: 14px;
-                        font-size: 13px;
+                        padding: 16px;
+                        border-radius: 16px;
+                        font-size: 14px;
+                        font-weight: 600;
                         display: flex;
                         align-items: center;
                         justify-content: center;
-                        gap: 8px;
+                        gap: 10px;
                       "
                     >
-                      <i class="fas fa-triangle-exclamation"></i>
-                      是，这是紧急情况 — 立即退出
+                      <i class="fas fa-hand-sparkles"></i>
+                      继续专注工作
                     </button>
                     <button
                       onclick="show('s-exit-2')"
@@ -554,7 +626,23 @@
                       "
                     >
                       <i class="fas fa-leaf" style="font-size: 12px"></i>
-                      不是，我只是想离开一下
+                      我只是想离开一下
+                    </button>
+                    <button
+                      onclick="emergencyExit()"
+                      class="btn-danger-soft"
+                      style="
+                        padding: 12px;
+                        border-radius: 14px;
+                        font-size: 12px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 7px;
+                      "
+                    >
+                      <i class="fas fa-triangle-exclamation"></i>
+                      紧急情况 — 立即退出
                     </button>
                   </div>
                   <p class="modal-foot">如果是紧急情况，我们不会留你。</p>
