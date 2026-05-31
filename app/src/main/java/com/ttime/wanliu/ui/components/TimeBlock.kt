@@ -15,6 +15,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
@@ -34,32 +35,68 @@ fun TimeBlock(
     style: String = "glass",
     modifier: Modifier = Modifier
 ) {
-    // Breathing card animation — box shadow glow pulses
     val infiniteTransition = rememberInfiniteTransition(label = "breatheCard")
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.12f,
-        targetValue = 0.28f,
+
+    // ── 三层呼吸动画 ──
+
+    // 1. 卡片整体缩放（极轻微，~1.5%）
+    val cardScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.014f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2500, easing = EaseInOutCubic),
+            animation = tween(4000, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "cardScale"
+    )
+
+    // 2. 外圈辉光强度（更明显的明暗变化）
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.06f,
+        targetValue = 0.32f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3500, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "glowAlpha"
     )
 
-    val breatheAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.55f,
-        targetValue = 0.9f,
+    // 3. 边框 + accent 线辉光
+    val borderGlow by infiniteTransition.animateFloat(
+        initialValue = 0.06f,
+        targetValue = 0.14f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2250, easing = EaseInOutCubic),
+            animation = tween(3200, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "borderGlow"
+    )
+
+    // 4. 鼓励语淡入淡出
+    val breatheAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 0.92f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2800, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "breathe"
     )
 
+    // 5. accent 线宽度呼吸
+    val accentWidth by infiniteTransition.animateFloat(
+        initialValue = 0.45f,
+        targetValue = 0.62f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(3800, easing = EaseInOutCubic),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "accentW"
+    )
+
     val isNoteStyle = style == "note"
     val isMinimal = style == "minimal"
 
-    // Glass style — frosted glass with breathing glow
     val blockModifier = when {
         isMinimal -> Modifier
             .clip(RoundedCornerShape(24.dp))
@@ -73,31 +110,31 @@ fun TimeBlock(
 
         else -> Modifier
             .shadow(
-                elevation = 16.dp,
+                elevation = 20.dp,
                 shape = RoundedCornerShape(28.dp),
                 ambientColor = PurplePrimary.copy(alpha = glowAlpha),
-                spotColor = PurplePrimary.copy(alpha = glowAlpha * 0.7f)
+                spotColor = PurplePrimary.copy(alpha = glowAlpha * 0.6f)
             )
             .clip(RoundedCornerShape(28.dp))
             .background(Color(0x9E080814))
-            .border(1.dp, Color.White.copy(alpha = 0.09f), RoundedCornerShape(28.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.07f + borderGlow), RoundedCornerShape(28.dp))
     }
 
     val textColor = if (isNoteStyle) Color(0xFF1A1A2E) else InkWhite
     val faintColor = if (isNoteStyle) Color(0xFF5C5340) else InkFaint
     val softColor = if (isNoteStyle) Color(0xFF3A3328) else InkSoft
-    val ghostColor = if (isNoteStyle) Color(0xFF8A7F6B) else InkGhost
     val progressTrack = if (isNoteStyle) Color(0xFFD4C388) else Color.White.copy(alpha = 0.1f)
     val progressFill = if (isNoteStyle)
         Brush.horizontalGradient(listOf(Color(0xFF8B6914), Color(0xFFC4A44A)))
     else
         Brush.horizontalGradient(listOf(PurplePrimary, PurpleLight))
-
-    val iconBg = if (isNoteStyle) Color(0xFFD4C388).copy(alpha = 0.2f) else PurplePrimary.copy(alpha = 0.2f)
+    val iconBg = if (isNoteStyle) Color(0xFFD4C388).copy(alpha = 0.2f) else PurplePrimary.copy(alpha = 0.18f + borderGlow * 0.8f)
     val iconTint = if (isNoteStyle) Color(0xFF8B6914) else PurpleLight
 
     Box(
-        modifier = modifier.then(blockModifier),
+        modifier = modifier
+            .scale(cardScale)
+            .then(blockModifier),
         contentAlignment = Alignment.Center
     ) {
         Column(
@@ -108,13 +145,13 @@ fun TimeBlock(
             if (!isMinimal && !isNoteStyle) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.55f)
+                        .fillMaxWidth(accentWidth)
                         .height(1.dp)
                         .background(
                             Brush.horizontalGradient(
                                 listOf(
                                     Color.Transparent,
-                                    PurpleLight.copy(alpha = 0.45f),
+                                    PurpleLight.copy(alpha = 0.25f + borderGlow * 2.5f),
                                     Color.Transparent
                                 )
                             )
@@ -140,7 +177,7 @@ fun TimeBlock(
                         Icon(
                             imageVector = Icons.Outlined.AutoAwesome,
                             contentDescription = null,
-                            tint = iconTint,
+                            tint = iconTint.copy(alpha = 0.7f + borderGlow * 1.5f),
                             modifier = Modifier.size(15.dp)
                         )
                     }
@@ -158,7 +195,7 @@ fun TimeBlock(
                             fontWeight = FontWeight.SemiBold,
                             letterSpacing = 0.8.sp
                         ),
-                        color = faintColor
+                        color = faintColor.copy(alpha = 0.7f + borderGlow)
                     )
                     Text(
                         text = taskName,
