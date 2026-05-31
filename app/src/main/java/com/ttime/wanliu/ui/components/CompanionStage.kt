@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import com.ttime.wanliu.ui.theme.*
 import kotlin.math.*
 import kotlin.random.Random
+import kotlinx.coroutines.isActive
 
 // ═══════════════════════════════════════
 // 叙事阶段数据
