@@ -22,6 +22,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ttime.wanliu.ui.components.FocusBackground
 import com.ttime.wanliu.ui.components.TimeBlock
+import com.ttime.wanliu.ui.components.CompanionStage
+import com.ttime.wanliu.ui.components.companionById
 import com.ttime.wanliu.ui.components.clickableWithoutRipple
 import com.ttime.wanliu.ui.theme.*
 import com.ttime.wanliu.ui.viewmodel.ExitStep
@@ -114,18 +116,50 @@ fun FocusScreen(
             }
         }
 
-        // Center time block
-        Box(
-            modifier = Modifier.fillMaxSize(),
-            contentAlignment = Alignment.Center
-        ) {
-            TimeBlock(
-                taskName = config.taskName.ifBlank { "专注任务" },
-                timeText = state.formattedTime,
-                progressPercent = state.progressPercent,
-                gentleMessage = "先留下这一段时间，不用追求完美。",
-                style = config.timeWindowStyle
-            )
+        // Center — companion stage + time block
+        val companion = companionById(config.companionId)
+
+        if (companion != null) {
+            // 有陪伴者：纵向布局，canvas 在上，time block 在下
+            Column(
+                modifier = Modifier.fillMaxSize(),
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.82f)
+                        .height(200.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    CompanionStage(
+                        companion = companion,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                }
+                Spacer(modifier = Modifier.height(8.dp))
+                TimeBlock(
+                    taskName = config.taskName.ifBlank { "专注任务" },
+                    timeText = state.formattedTime,
+                    progressPercent = state.progressPercent,
+                    gentleMessage = "先留下这一段时间，不用追求完美。",
+                    style = config.timeWindowStyle
+                )
+            }
+        } else {
+            // 无陪伴者：time block 居中
+            Box(
+                modifier = Modifier.fillMaxSize(),
+                contentAlignment = Alignment.Center
+            ) {
+                TimeBlock(
+                    taskName = config.taskName.ifBlank { "专注任务" },
+                    timeText = state.formattedTime,
+                    progressPercent = state.progressPercent,
+                    gentleMessage = "先留下这一段时间，不用追求完美。",
+                    style = config.timeWindowStyle
+                )
+            }
         }
 
         // Bottom ambient indicator

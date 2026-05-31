@@ -18,6 +18,7 @@ data class FocusConfig(
     val durationMinutes: Int = 50,
     val backgroundTheme: String = "rain",
     val timeWindowStyle: String = "glass",
+    val companionId: String = "none",
     val isCustomDuration: Boolean = false,
     val customDurationMinutes: Int = 30
 )
@@ -122,6 +123,12 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
     fun updateTimeWindowStyle(style: String) {
         _state.value = _state.value.copy(
             config = _state.value.config.copy(timeWindowStyle = style)
+        )
+    }
+
+    fun updateCompanion(companionId: String) {
+        _state.value = _state.value.copy(
+            config = _state.value.config.copy(companionId = companionId)
         )
     }
 

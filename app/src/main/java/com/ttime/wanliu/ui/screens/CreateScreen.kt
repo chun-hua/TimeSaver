@@ -116,6 +116,13 @@ fun CreateScreen(
 
             Spacer(modifier = Modifier.height(28.dp))
 
+            CompanionSection(
+                selectedId = config.companionId,
+                onSelect = { viewModel.updateCompanion(it) }
+            )
+
+            Spacer(modifier = Modifier.height(28.dp))
+
             Button(
                 onClick = {
                     if (config.taskName.isBlank()) {
@@ -410,5 +417,34 @@ private fun StyleSection(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun CompanionSection(
+    selectedId: String,
+    onSelect: (String) -> Unit
+) {
+    Column(modifier = Modifier.fillMaxWidth()) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            SectionLabel(Icons.Filled.Person, "陪伴者")
+            Text(
+                text = "可选",
+                style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp),
+                color = InkGhost,
+                modifier = Modifier.padding(start = 4.dp)
+            )
+        }
+        Spacer(modifier = Modifier.height(6.dp))
+        Text(
+            text = "选一位大师陪你工作。Ta 的粒子影像会浮现在专注计时的上方，安静地陪着你。",
+            style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, lineHeight = 17.sp),
+            color = InkFaint,
+            modifier = Modifier.padding(bottom = 12.dp)
+        )
+        CompanionPicker(
+            selectedId = selectedId,
+            onSelect = onSelect
+        )
     }
 }

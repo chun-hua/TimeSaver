@@ -9,7 +9,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.Cloud
 import androidx.compose.material.icons.filled.DesktopWindows
-import androidx.compose.material.icons.filled.MenuBook
+import androidx.compose.material.icons.automirrored.filled.MenuBook
 import androidx.compose.material.icons.filled.Nature
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -40,7 +40,7 @@ data class ThemeInfo(
 
 val BackgroundThemes = listOf(
     ThemeInfo("rain", "雨夜", Icons.Filled.Cloud, Color(0xFF1A1A3E)),
-    ThemeInfo("library", "图书馆", Icons.Filled.MenuBook, Color(0xFF2D1F1A)),
+    ThemeInfo("library", "图书馆", Icons.AutoMirrored.Filled.MenuBook, Color(0xFF2D1F1A)),
     ThemeInfo("forest", "森林", Icons.Filled.Nature, Color(0xFF1A2E1A)),
     ThemeInfo("cyber", "赛博桌面", Icons.Filled.DesktopWindows, Color(0xFF1A1A2E))
 )
