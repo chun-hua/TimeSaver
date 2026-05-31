@@ -383,19 +383,29 @@ fun CompanionStage(
     val stages = stagesFor(companion)
     val stageCount = if (stages != null) 8 else 3
 
-    // 形态轮播
-    val infiniteTransition = rememberInfiniteTransition(label = "stage")
-    val morphProgress by infiniteTransition.animateFloat(0f, 1f,
-        infiniteRepeatable(tween(6000, easing = EaseInOutCubic), RepeatMode.Restart), "morph")
-
+    // ── 形态轮播：精确计时，每 6 秒切换一次 ──
     var formIndex by remember { mutableIntStateOf(0) }
-    LaunchedEffect(morphProgress) { if (morphProgress >= 0.98f) formIndex = (formIndex + 1) % stageCount }
+    val morphAnim = remember { Animatable(0f) }
+    val morphProgress = morphAnim.value
 
-    // 呼吸亮度
+    LaunchedEffect(Unit) {
+        while (isActive) {
+            morphAnim.snapTo(0f)
+            morphAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(
+                    durationMillis = 6000,
+                    easing = EaseInOutCubic
+                )
+            )
+            formIndex = (formIndex + 1) % stageCount
+        }
+    }
+
+    // ── 呼吸亮度 + 旋转（独立连续动画）──
+    val infiniteTransition = rememberInfiniteTransition(label = "aux")
     val breathe by infiniteTransition.animateFloat(0.6f, 1f,
-        infiniteRepeatable(tween(3000, easing = EaseInOutCubic), RepeatMode.Reverse), "breath")
-
-    // 旋转
+        infiniteRepeatable(tween(3000, easing = EaseInOutCubic), RepeatMode.Reverse), "breathe")
     val rotation by infiniteTransition.animateFloat(0f, 360f,
         infiniteRepeatable(tween(20000, easing = LinearEasing), RepeatMode.Restart), "rot")
 
