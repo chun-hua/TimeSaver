@@ -403,15 +403,13 @@ fun CompanionStage(
         }
     }
 
-    // ── 呼吸亮度 + 旋转（独立连续动画）──
+    // ── 呼吸亮度（独立连续动画）──
     val infiniteTransition = rememberInfiniteTransition(label = "aux")
-    val breathe by infiniteTransition.animateFloat(0.6f, 1f,
+    val breathe by infiniteTransition.animateFloat(0.7f, 1f,
         infiniteRepeatable(tween(3000, easing = EaseInOutCubic), RepeatMode.Reverse), "breathe")
-    val rotation by infiniteTransition.animateFloat(0f, 360f,
-        infiniteRepeatable(tween(20000, easing = LinearEasing), RepeatMode.Restart), "rot")
 
     val rng = remember { Random(companion.id.hashCode()) }
-    val particleCount = 180
+    val particleCount = 200
     val particles = remember { List(particleCount) { Pair(rng.nextFloat(), rng.nextFloat()) } }
     val currentTint = if (stages != null) {
         val s = stages[formIndex]
@@ -429,35 +427,33 @@ fun CompanionStage(
         // 粒子画布
         Canvas(modifier = Modifier.fillMaxSize()) {
             val cx = size.width / 2f; val cy = size.height / 2f
-            val scale = min(size.width, size.height) * 0.38f
+            val scale = min(size.width, size.height) * 0.42f
 
             // 背景辉光
             drawCircle(Brush.radialGradient(
-                listOf(currentTint.copy(alpha = 0.08f * breathe), Color.Transparent),
-                center = Offset(cx, cy), radius = size.minDimension * 0.45f
-            ), radius = size.minDimension * 0.45f, center = Offset(cx, cy))
+                listOf(currentTint.copy(alpha = 0.12f * breathe), Color.Transparent),
+                center = Offset(cx, cy), radius = size.minDimension * 0.48f
+            ), radius = size.minDimension * 0.48f, center = Offset(cx, cy))
 
             val easedP = easeCubic(morphProgress)
-            val rad = Math.toRadians(rotation.toDouble()).toFloat()
 
             for (i in particles.indices) {
                 val from = currentForm[i]; val to = nextForm[i]
                 val ax = from.first + (to.first - from.first) * easedP
                 val ay = from.second + (to.second - from.second) * easedP
-                val rx = ax * cos(rad) - ay * sin(rad)
-                val ry = ax * sin(rad) + ay * cos(rad)
-                val px = cx + rx * scale; val py = cy + ry * scale
-                val sz = (1.2f + particles[i].first * 1.6f) * breathe
-                val alpha = (0.3f + particles[i].second * 0.5f) * breathe
-                drawCircle(Color.White.copy(alpha = alpha * 0.06f), sz * 5f, Offset(px, py))
-                drawCircle(currentTint.copy(alpha = alpha * 0.12f), sz * 2.5f, Offset(px, py))
-                drawCircle(currentTint.copy(alpha = alpha * 0.7f), sz, Offset(px, py))
+                val px = cx + ax * scale; val py = cy + ay * scale
+                val sz = (1.5f + particles[i].first * 2.2f) * breathe
+                val alpha = (0.4f + particles[i].second * 0.6f) * breathe
+                // 三层辉光（更亮更大）
+                drawCircle(Color.White.copy(alpha = alpha * 0.10f), sz * 5.5f, Offset(px, py))
+                drawCircle(currentTint.copy(alpha = alpha * 0.18f), sz * 2.8f, Offset(px, py))
+                drawCircle(currentTint.copy(alpha = alpha * 0.80f), sz, Offset(px, py))
             }
             // 中心柔光
             drawCircle(Brush.radialGradient(
-                listOf(Color.White.copy(alpha = 0.15f * breathe), currentTint.copy(alpha = 0.06f * breathe), Color.Transparent),
-                center = Offset(cx, cy), radius = size.minDimension * 0.06f
-            ), radius = size.minDimension * 0.06f, center = Offset(cx, cy))
+                listOf(Color.White.copy(alpha = 0.22f * breathe), currentTint.copy(alpha = 0.10f * breathe), Color.Transparent),
+                center = Offset(cx, cy), radius = size.minDimension * 0.08f
+            ), radius = size.minDimension * 0.08f, center = Offset(cx, cy))
         }
 
         // ── 阶段圆点 ──

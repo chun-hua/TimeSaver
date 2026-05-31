@@ -133,6 +133,8 @@ fun TimeBlock(
 
     Box(
         modifier = modifier
+            .widthIn(max = 334.dp)
+            .fillMaxWidth()
             .scale(cardScale)
             .then(blockModifier),
         contentAlignment = Alignment.Center
