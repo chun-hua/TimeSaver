@@ -1,0 +1,31 @@
+# Android / Gradle
+*.iml
+.gradle/
+.kotlin/
+/local.properties
+.DS_Store
+/build/
+/captures/
+.externalNativeBuild/
+.cxx/
+
+# Build output
+app/build/
+**/build/
+
+# IDE
+.idea/
+*.hprof
+
+# Local history (VSCode plugin)
+.history/
+
+# Keystore（不要把签名密钥提交到仓库）
+*.jks
+*.keystore
+
+# APK / 构建产物
+*.apk
+*.aab
+*.ap_
+*.dex

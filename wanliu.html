@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>挽留者 — 沉浸式专注空间</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; }
+
+    :root {
+      --accent:      #8b5cf6;
+      --accent-2:    #6366f1;
+      --accent-grad: linear-gradient(135deg, #8b5cf6, #6366f1);
+      --ink:         #ece8ff;
+      --ink-soft:    rgba(236,232,255,.62);
+      --ink-faint:   rgba(236,232,255,.34);
+      --ink-ghost:   rgba(236,232,255,.18);
+    }
+
+    body {
+      font-family: 'Noto Sans SC', 'Inter', system-ui, sans-serif;
+      background:
+        radial-gradient(ellipse 80% 60% at 20% 0%, #16122b 0%, transparent 60%),
+        radial-gradient(ellipse 70% 70% at 90% 100%, #0e1430 0%, transparent 55%),
+        #05050b;
+      color: var(--ink);
+      overflow: hidden;
+      margin: 0;
+      padding: 0;
+      -webkit-font-smoothing: antialiased;
+      text-rendering: optimizeLegibility;
+    }
+
+    /* ── Glass ── */
+    .glass {
+      background: rgba(255,255,255,0.07);
+      backdrop-filter: blur(20px) saturate(140%);
+      -webkit-backdrop-filter: blur(20px) saturate(140%);
+      border: 1px solid rgba(255,255,255,0.14);
+    }
+    .glass-dark {
+      background: rgba(10,9,24,0.55);
+      backdrop-filter: blur(30px) saturate(150%);
+      -webkit-backdrop-filter: blur(30px) saturate(150%);
+      border: 1px solid rgba(255,255,255,0.10);
+      box-shadow: 0 1px 0 rgba(255,255,255,.08) inset, 0 24px 60px -20px rgba(0,0,0,.7);
+    }
+
+    /* ── Screens ── */
+    .screen {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+    .screen.active { display: flex; }
+
+    /* ── BG overlays ── */
+    .bg-img {
+      background-image: var(--bg);
+      background-size: cover;
+      background-position: center;
+    }
+    .bg-overlay {
+      background: linear-gradient(160deg, rgba(7,7,20,0.55) 0%, rgba(16,8,34,0.50) 55%, rgba(7,7,20,0.72) 100%);
+    }
+
+    /* ── Glow / Pulse ── */
+    .glow-purple { box-shadow: 0 0 40px rgba(124,58,237,0.35), 0 0 80px rgba(124,58,237,0.12); }
+
+    @keyframes float      { 0%,100%{transform:translateY(0)}  50%{transform:translateY(-8px)} }
+    @keyframes breathe    { 0%,100%{opacity:.55} 50%{opacity:.9} }
+    @keyframes fadeSlideUp{ from{opacity:0;transform:translateY(12px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes pulseSoft  { 0%,100%{box-shadow:0 0 30px rgba(124,58,237,.3)} 50%{box-shadow:0 0 55px rgba(124,58,237,.55)} }
+    @keyframes dotPulse   { 0%,100%{opacity:1} 50%{opacity:.3} }
+
+    .anim-float      { animation: float 7s ease-in-out infinite; }
+    .anim-breathe    { animation: breathe 4.5s ease-in-out infinite; }
+    .anim-fade       { animation: fadeSlideUp .45s ease both; }
+    .anim-pulse-soft { animation: pulseSoft 3.5s ease infinite; }
+    .anim-dot        { animation: dotPulse 2s ease infinite; }
+
+    /* ── Window chrome dots ── */
+    .win-dot { width: 12px; height: 12px; border-radius: 50%; }
+
+    /* ── Duration pills ── */
+    .dur-pill {
+      cursor: pointer;
+      flex: 1;
+      min-width: 64px;
+      text-align: center;
+      white-space: nowrap;
+      padding: 11px 16px;
+      border-radius: 13px;
+      font-size: 13px;
+      font-weight: 500;
+      border: 1.5px solid rgba(255,255,255,0.1);
+      background: rgba(255,255,255,0.04);
+      color: var(--ink-soft);
+      transition: all .2s ease;
+      user-select: none;
+    }
+    .dur-pill:hover { border-color: rgba(139,92,246,.45); }
+    .dur-pill.sel {
+      border-color: rgba(139,92,246,.85);
+      background: rgba(139,92,246,.2);
+      color: #d6caff;
+      box-shadow: 0 0 18px rgba(124,58,237,.25);
+    }
+
+    /* ── Theme cards ── */
+    .theme-card {
+      position: relative;
+      height: 100px;
+      border-radius: 17px;
+      overflow: hidden;
+      cursor: pointer;
+      border: 2px solid transparent;
+      transition: all .22s ease;
+    }
+    .theme-card:hover { transform: translateY(-2px); }
+    .theme-card.sel   { border-color: rgba(139,92,246,.95); box-shadow: 0 0 22px rgba(124,58,237,.35); }
+    .theme-card .tc-img { position:absolute;inset:0;background-size:cover;background-position:center;transition:transform .5s ease; }
+    .theme-card:hover .tc-img { transform: scale(1.08); }
+    .theme-card .tc-dim { position:absolute;inset:0;background:linear-gradient(180deg, rgba(0,0,0,.15), rgba(0,0,0,.55)); }
+    .theme-card .tc-label {
+      position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:7px;
+      color:#fff;font-size:12px;font-weight:500;text-shadow:0 1px 6px rgba(0,0,0,.5);
+    }
+    .theme-card .tc-check {
+      position:absolute;top:8px;right:8px;
+      width:21px;height:21px;border-radius:50%;
+      background: var(--accent-grad);
+      display:flex;align-items:center;justify-content:center;
+      font-size:10px;color:#fff;
+      opacity:0;transform:scale(.5);transition:all .25s ease;
+    }
+    .theme-card.sel .tc-check { opacity:1;transform:scale(1); }
+
+    /* ── Style cards ── */
+    .style-card {
+      flex:1;cursor:pointer;border-radius:15px;
+      padding:14px 8px;text-align:center;
+      border: 1.5px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      transition: all .22s ease;
+    }
+    .style-card:hover { border-color: rgba(139,92,246,.4); }
+    .style-card.sel {
+      border-color: rgba(139,92,246,.8);
+      background: rgba(139,92,246,.13);
+    }
+    .style-card .preview-text {
+      font-family:'Inter',monospace;font-size:16px;margin-bottom:8px;
+    }
+    .style-card .label { font-size:11px;color:var(--ink-faint); }
+
+    /* ── Buttons ── */
+    .btn-primary {
+      background: var(--accent-grad);
+      color:#fff;font-weight:600;
+      border:none;cursor:pointer;
+      white-space:nowrap;
+      transition: all .22s ease;
+      box-shadow: 0 6px 24px rgba(124,58,237,.45);
+    }
+    .btn-primary:hover { transform:translateY(-2px); box-shadow: 0 10px 34px rgba(124,58,237,.6); }
+    .btn-primary:active { transform:translateY(0) scale(.99); }
+
+    .btn-ghost {
+      background: rgba(255,255,255,.06);
+      border: 1px solid rgba(255,255,255,.13);
+      color: var(--ink-soft);
+      cursor:pointer;
+      white-space:nowrap;
+      transition: all .2s ease;
+    }
+    .btn-ghost:hover { background: rgba(255,255,255,.11); }
+
+    .btn-danger-soft {
+      background: rgba(239,68,68,.08);
+      border: 1px solid rgba(239,68,68,.22);
+      color: rgba(252,165,165,.9);
+      cursor:pointer;
+      white-space:nowrap;
+      transition: all .2s ease;
+    }
+    .btn-danger-soft:hover { background: rgba(239,68,68,.16); }
+
+    /* ── Input / Textarea ── */
+    input[type=text], textarea {
+      background: rgba(255,255,255,.05);
+      border: 1.5px solid rgba(255,255,255,.1);
+      color: var(--ink);
+      font-family: inherit;
+      transition: border-color .2s, box-shadow .2s, background .2s;
+      outline: none;
+      resize: none;
+    }
+    input[type=text]::placeholder, textarea::placeholder { color: var(--ink-ghost); }
+    input[type=text]:focus, textarea:focus {
+      border-color: rgba(139,92,246,.7);
+      background: rgba(139,92,246,.07);
+      box-shadow: 0 0 0 4px rgba(139,92,246,.12);
+    }
+
+    /* ── Focus screen time block ── */
+    .time-block {
+      text-align:center;
+      padding: 40px 44px;
+      border-radius: 30px;
+      width: 100%;
+      max-width: 340px;
+    }
+
+    /* ── Progress bar ── */
+    .prog-track {
+      height: 4px;
+      border-radius: 3px;
+      background: rgba(255,255,255,.1);
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: 3px;
+      background: linear-gradient(90deg,#7c3aed,#a78bfa);
+      transition: width .8s ease;
+      box-shadow: 0 0 12px rgba(167,139,250,.6);
+    }
+
+    /* ── Modal backdrop ── */
+    .modal-bg {
+      position:absolute;inset:0;
+      background: rgba(0,0,0,.55);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+      display:flex;align-items:center;justify-content:center;
+      z-index:30;
+    }
+    .modal-card {
+      width: 90%;
+      max-width: 380px;
+      border-radius: 30px;
+      padding: 36px 32px;
+      animation: modalUp .5s cubic-bezier(.34,1.3,.45,1) both;
+    }
+    @keyframes modalUp { from{opacity:0;transform:translateY(30px) scale(.96)} to{opacity:1;transform:none} }
+
+    /* ── Progress ring ── */
+    .ring-svg { transform: rotate(-90deg); }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width:3px; }
+    ::-webkit-scrollbar-thumb { background: rgba(124,58,237,.4); border-radius:2px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+
+    /* ── Label section ── */
+    .form-label {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--ink-soft);
+      letter-spacing: .04em;
+      margin-bottom: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .form-label i { color: var(--accent); font-size: 12px; }
+
+    /* ── Ambient equalizer bars ── */
+    .eq-bars { display:flex; align-items:flex-end; gap:2px; height:11px; }
+    .eq-bars span { width:2px; background: rgba(167,139,250,.6); border-radius:2px; animation: eq 1s ease-in-out infinite; }
+    @keyframes eq { 0%,100%{height:3px} 50%{height:11px} }
+  </style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════════
+     SCREEN 1 · CREATE FOCUS SPACE
+     ════════════════════════════════════════ -->
+<div id="s-create" class="screen active" style="align-items:flex-start; overflow-y:auto; height:100vh; display:flex;">
+  <!-- Ambient BG -->
+  <div style="position:fixed;inset:0;pointer-events:none;
+    background:
+      radial-gradient(ellipse 60% 60% at 15% 55%, rgba(88,28,135,.22) 0%, transparent 70%),
+      radial-gradient(ellipse 50% 50% at 85% 20%, rgba(49,46,129,.26) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 60% 85%, rgba(109,40,217,.14) 0%, transparent 55%),
+      #05050b;
+  "></div>
+
+  <div style="position:relative;z-index:1;width:100%;max-width:520px;margin:0 auto;padding:48px 28px 72px;">
+
+    <!-- Window chrome -->
+    <div style="display:flex;align-items:center;gap:7px;margin-bottom:40px;">
+      <div class="win-dot" style="background:#ff5f57;"></div>
+      <div class="win-dot" style="background:#febc2e;"></div>
+      <div class="win-dot" style="background:#28c840;"></div>
+      <span style="margin-left:12px;font-size:12px;color:rgba(255,255,255,.25);letter-spacing:.08em;">挽留者</span>
+    </div>
+
+    <!-- Header -->
+    <div style="margin-bottom:40px;">
+      <div style="display:flex;align-items:center;gap:12px;margin-bottom:8px;">
+        <div style="width:42px;height:42px;border-radius:14px;background:var(--accent-grad);
+          display:flex;align-items:center;justify-content:center;box-shadow:0 6px 20px rgba(124,58,237,.5);">
+          <i class="fas fa-moon" style="color:#fff;font-size:16px;"></i>
+        </div>
+        <h1 style="font-size:23px;font-weight:600;color:var(--ink);margin:0;letter-spacing:-.01em;">创建专注空间</h1>
+      </div>
+      <p style="font-size:13px;color:var(--ink-faint);margin:0;padding-left:54px;">给自己一段完整的时间，不被打扰。</p>
+    </div>
+
+    <!-- Task name -->
+    <div style="margin-bottom:28px;">
+      <div class="form-label"><i class="fas fa-pen-to-square"></i>当前任务</div>
+      <input type="text" id="task-name" placeholder="例如：写论文 introduction"
+        style="width:100%;padding:14px 16px;border-radius:14px;font-size:15px;">
+    </div>
+
+    <!-- Duration -->
+    <div style="margin-bottom:28px;">
+      <div class="form-label"><i class="fas fa-timer"></i>专注时长</div>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;">
+        <div class="dur-pill" onclick="pickDur(this,25)">25 分钟</div>
+        <div class="dur-pill sel" onclick="pickDur(this,50)">50 分钟</div>
+        <div class="dur-pill" onclick="pickDur(this,90)">90 分钟</div>
+        <div class="dur-pill" onclick="pickDur(this,0)">自定义</div>
+      </div>
+    </div>
+
+    <!-- Background theme -->
+    <div style="margin-bottom:28px;">
+      <div class="form-label"><i class="fas fa-photo-film"></i>背景主题</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;">
+        <!-- Rain -->
+        <div class="theme-card sel" id="tc-rain" onclick="pickTheme('rain')">
+          <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=400&q=70');"></div>
+          <div class="tc-dim"></div>
+          <div class="tc-label">
+            <i class="fas fa-cloud-rain" style="font-size:18px;"></i>
+            <span>雨夜</span>
+          </div>
+          <div class="tc-check"><i class="fas fa-check"></i></div>
+        </div>
+        <!-- Library -->
+        <div class="theme-card" id="tc-library" onclick="pickTheme('library')">
+          <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=400&q=70');"></div>
+          <div class="tc-dim"></div>
+          <div class="tc-label">
+            <i class="fas fa-book-open" style="font-size:18px;"></i>
+            <span>图书馆</span>
+          </div>
+        </div>
+        <!-- Forest -->
+        <div class="theme-card" id="tc-forest" onclick="pickTheme('forest')">
+          <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=400&q=70');"></div>
+          <div class="tc-dim"></div>
+          <div class="tc-label">
+            <i class="fas fa-tree" style="font-size:18px;"></i>
+            <span>森林</span>
+          </div>
+        </div>
+        <!-- Cyber -->
+        <div class="theme-card" id="tc-cyber" onclick="pickTheme('cyber')">
+          <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=400&q=70');"></div>
+          <div class="tc-dim"></div>
+          <div class="tc-label">
+            <i class="fas fa-desktop" style="font-size:18px;"></i>
+            <span>赛博桌面</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Style selection -->
+    <div style="margin-bottom:36px;">
+      <div class="form-label"><i class="fas fa-layer-group"></i>时间窗口样式</div>
+      <div style="display:flex;gap:10px;">
+        <div class="style-card" onclick="pickStyle(this,'minimal')">
+          <div class="preview-text" style="color:#a78bfa;font-weight:300;">24:00</div>
+          <div class="label">极简</div>
+        </div>
+        <div class="style-card sel" onclick="pickStyle(this,'glass')">
+          <div class="preview-text glass" style="display:inline-block;padding:2px 10px;border-radius:8px;color:#e8e8f0;">24:00</div>
+          <div class="label" style="margin-top:6px;">玻璃</div>
+        </div>
+        <div class="style-card" onclick="pickStyle(this,'note')">
+          <div class="preview-text" style="display:inline-block;padding:2px 9px;border-radius:6px;background:#fdf3d3;color:#3a2c12;font-size:15px;">24:00</div>
+          <div class="label" style="margin-top:6px;">便利贴</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Start button -->
+    <button onclick="goFocus()" class="btn-primary"
+      style="width:100%;padding:16px;border-radius:18px;font-size:15px;
+        display:flex;align-items:center;justify-content:center;gap:10px;">
+      <i class="fas fa-play" style="font-size:13px;"></i>
+      进入专注空间
+    </button>
+    <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.2);margin-top:14px;">
+      进入后专注时间自动开始，保持窗口前台即可
+    </p>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 2 · FULL-SCREEN FOCUS SPACE
+     ════════════════════════════════════════ -->
+<div id="s-focus" class="screen">
+  <!-- BG image + overlay -->
+  <div id="focus-bg" class="bg-img" style="position:absolute;inset:0;
+    --bg:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80');"></div>
+  <div class="bg-overlay" style="position:absolute;inset:0;"></div>
+  <!-- subtle vignette -->
+  <div style="position:absolute;inset:0;background:radial-gradient(ellipse 70% 70% at 50% 50%, transparent 40%, rgba(0,0,0,.45) 100%);pointer-events:none;"></div>
+
+  <!-- Top bar -->
+  <div style="position:absolute;top:0;left:0;right:0;padding:18px 24px;
+    display:flex;align-items:center;justify-content:space-between;z-index:20;">
+    <!-- Exit (subtle) -->
+    <button onclick="show('s-exit-1')" class="btn-ghost"
+      style="padding:7px 14px;border-radius:10px;font-size:12px;
+        display:flex;align-items:center;gap:7px;">
+      <i class="fas fa-xmark" style="font-size:11px;"></i>
+      <span>退出</span>
+    </button>
+    <!-- Status -->
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="anim-dot" style="width:6px;height:6px;border-radius:50%;background:#34d399;"></div>
+      <span style="font-size:11px;color:rgba(255,255,255,.3);letter-spacing:.05em;">专注中</span>
+    </div>
+  </div>
+
+  <!-- Time block (center, floating) -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;z-index:10;">
+    <div class="time-block glass-dark anim-float">
+
+      <!-- Task label -->
+      <div style="margin-bottom:24px;">
+        <div style="font-size:10px;font-weight:600;letter-spacing:.14em;color:var(--ink-faint);
+          text-transform:uppercase;margin-bottom:9px;">当前任务</div>
+        <div id="disp-task" style="font-size:17px;font-weight:500;color:var(--ink);">写论文 introduction</div>
+      </div>
+
+      <!-- Countdown -->
+      <div id="focus-clock" style="font-size:74px;font-weight:200;letter-spacing:-.03em;
+        color:#f3f0ff;font-family:'Inter',monospace;line-height:1;
+        text-shadow:0 0 55px rgba(167,139,250,.55);margin-bottom:28px;">
+        47:23
+      </div>
+
+      <!-- Progress -->
+      <div style="margin-bottom:24px;">
+        <div style="display:flex;justify-content:space-between;font-size:11px;
+          color:rgba(255,255,255,.32);margin-bottom:8px;">
+          <span>专注进度</span>
+          <span id="focus-pct">6%</span>
+        </div>
+        <div class="prog-track"><div class="prog-fill" id="focus-bar" style="width:6%;"></div></div>
+      </div>
+
+      <!-- Gentle message -->
+      <div class="anim-breathe" style="font-size:12px;color:rgba(255,255,255,.42);line-height:1.7;">
+        先留下这一段时间，不用追求完美。
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom: ambient sound indicator -->
+  <div style="position:absolute;bottom:24px;left:0;right:0;display:flex;justify-content:center;z-index:10;">
+    <div style="display:flex;align-items:center;gap:9px;font-size:11px;color:var(--ink-ghost);">
+      <div class="eq-bars">
+        <span style="animation-delay:0s;"></span><span style="animation-delay:.2s;"></span>
+        <span style="animation-delay:.4s;"></span><span style="animation-delay:.15s;"></span>
+      </div>
+      <span id="ambient-name">雨夜氛围 · 循环播放</span>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 3 · EXIT FLOW STEP 1 — EMERGENCY?
+     ════════════════════════════════════════ -->
+<div id="s-exit-1" class="screen">
+  <div id="exit1-bg" class="bg-img" style="position:absolute;inset:0;
+    --bg:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80');"></div>
+  <div class="bg-overlay" style="position:absolute;inset:0;"></div>
+
+  <!-- Blurred ghost time block -->
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.15;filter:blur(4px);">
+    <div class="time-block glass-dark">
+      <div style="font-size:62px;font-weight:300;color:#f0edff;font-family:'Inter',monospace;">47:23</div>
+    </div>
+  </div>
+
+  <!-- Modal overlay -->
+  <div class="modal-bg">
+    <div class="modal-card glass-dark anim-fade">
+
+      <!-- Icon -->
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:18px;
+          background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.3);
+          display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-circle-question" style="font-size:22px;color:#a78bfa;"></i>
+        </div>
+      </div>
+
+      <h2 style="text-align:center;font-size:19px;font-weight:600;margin:0 0 8px;color:#ece8ff;">
+        你想离开了吗？
+      </h2>
+      <p style="text-align:center;font-size:13px;color:rgba(255,255,255,.38);margin:0 0 28px;line-height:1.6;">
+        这是紧急情况吗？
+      </p>
+
+      <!-- Options -->
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="emergencyExit()" class="btn-danger-soft"
+          style="padding:14px;border-radius:14px;font-size:13px;
+            display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-triangle-exclamation"></i>
+          是，这是紧急情况 — 立即退出
+        </button>
+        <button onclick="show('s-exit-2')" class="btn-primary"
+          style="padding:14px;border-radius:14px;font-size:13px;
+            display:flex;align-items:center;justify-content:center;gap:8px;">
+          <i class="fas fa-leaf" style="font-size:12px;"></i>
+          不是，我只是想离开一下
+        </button>
+      </div>
+
+      <p style="text-align:center;font-size:11px;color:rgba(255,255,255,.18);margin-top:20px;">
+        如果是紧急情况，我们不会留你
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 4 · EXIT FLOW STEP 2 — WRITE REASON
+     ════════════════════════════════════════ -->
+<div id="s-exit-2" class="screen">
+  <div class="bg-img" style="position:absolute;inset:0;
+    --bg:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80');"></div>
+  <div class="bg-overlay" style="position:absolute;inset:0;"></div>
+
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.15;filter:blur(4px);">
+    <div class="time-block glass-dark">
+      <div style="font-size:62px;font-weight:300;color:#f0edff;font-family:'Inter',monospace;">47:23</div>
+    </div>
+  </div>
+
+  <div class="modal-bg">
+    <div class="modal-card glass-dark anim-fade">
+
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:18px;
+          background:rgba(124,58,237,.18);border:1px solid rgba(124,58,237,.3);
+          display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-feather" style="font-size:20px;color:#a78bfa;"></i>
+        </div>
+      </div>
+
+      <h2 style="text-align:center;font-size:19px;font-weight:600;margin:0 0 8px;color:#ece8ff;">
+        你现在想去做什么？
+      </h2>
+      <p style="text-align:center;font-size:13px;color:rgba(255,255,255,.38);margin:0 0 22px;line-height:1.65;">
+        写下来，不是为了批评你，<br>只是让冲动慢一点。
+      </p>
+
+      <textarea id="reason-input" rows="4"
+        placeholder="例如：刷视频、回消息、躺一下、查资料……"
+        style="width:100%;padding:14px 16px;border-radius:14px;font-size:13px;margin-bottom:16px;"></textarea>
+
+      <button onclick="startCooldown()" class="btn-primary"
+        style="width:100%;padding:14px;border-radius:14px;font-size:13px;margin-bottom:10px;
+          display:flex;align-items:center;justify-content:center;gap:8px;">
+        <i class="fas fa-hourglass-half" style="font-size:12px;"></i>
+        我写好了，先冷静 10 分钟
+      </button>
+      <button onclick="show('s-exit-1')" class="btn-ghost"
+        style="width:100%;padding:12px;border-radius:14px;font-size:12px;
+          display:flex;align-items:center;justify-content:center;gap:7px;">
+        <i class="fas fa-arrow-left" style="font-size:11px;"></i>返回
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 5 · EXIT FLOW STEP 3 — 10-MIN COOL-DOWN
+     ════════════════════════════════════════ -->
+<div id="s-exit-3" class="screen">
+  <div class="bg-img" style="position:absolute;inset:0;
+    --bg:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80');"></div>
+  <div class="bg-overlay" style="position:absolute;inset:0;"></div>
+
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.12;filter:blur(5px);">
+    <div class="time-block glass-dark">
+      <div style="font-size:62px;font-weight:300;color:#f0edff;font-family:'Inter',monospace;">47:23</div>
+    </div>
+  </div>
+
+  <div class="modal-bg">
+    <div class="modal-card glass-dark anim-fade" style="text-align:center;">
+
+      <!-- Ring timer -->
+      <div style="display:flex;justify-content:center;margin-bottom:24px;">
+        <div style="position:relative;width:128px;height:128px;">
+          <svg class="ring-svg" width="128" height="128" style="position:absolute;top:0;left:0;">
+            <defs>
+              <linearGradient id="rg" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stop-color="#7c3aed"/>
+                <stop offset="100%" stop-color="#a78bfa"/>
+              </linearGradient>
+            </defs>
+            <circle cx="64" cy="64" r="56"
+              stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/>
+            <circle id="cool-ring" cx="64" cy="64" r="56"
+              stroke="url(#rg)" stroke-width="5" fill="none"
+              stroke-dasharray="351.86" stroke-dashoffset="0"
+              stroke-linecap="round"/>
+          </svg>
+          <div style="position:absolute;inset:0;display:flex;flex-direction:column;
+            align-items:center;justify-content:center;">
+            <div id="cool-clock" style="font-size:28px;font-weight:300;
+              color:#f0edff;font-family:'Inter',monospace;letter-spacing:-.02em;">
+              10:00
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <h2 style="font-size:19px;font-weight:600;margin:0 0 10px;color:#ece8ff;">先冷静 10 分钟</h2>
+
+      <p style="font-size:13px;color:rgba(255,255,255,.42);margin:0 0 6px;line-height:1.65;">
+        冲动会升起，也会下降。
+      </p>
+      <p style="font-size:13px;color:rgba(255,255,255,.42);margin:0 0 22px;line-height:1.65;">
+        你仍然有选择权。
+      </p>
+
+      <!-- Cycling gentle message -->
+      <div class="glass" style="border-radius:14px;padding:14px 18px;margin-bottom:22px;">
+        <p id="cool-msg" style="font-size:12px;color:rgba(255,255,255,.48);
+          line-height:1.75;margin:0;transition:opacity .4s ease;">
+          你不需要完成所有事。<br>只是继续待着，就已经很好了。
+        </p>
+      </div>
+
+      <button onclick="show('s-focus')" class="btn-ghost"
+        style="width:100%;padding:13px;border-radius:14px;font-size:13px;
+          display:flex;align-items:center;justify-content:center;gap:8px;color:rgba(255,255,255,.5);">
+        <i class="fas fa-arrow-rotate-left" style="font-size:11px;"></i>
+        我现在就想回到任务
+      </button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     SCREEN 6 · COOL-DOWN ENDED — FINAL CHOICE
+     ════════════════════════════════════════ -->
+<div id="s-exit-4" class="screen">
+  <div class="bg-img" style="position:absolute;inset:0;
+    --bg:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80');"></div>
+  <div class="bg-overlay" style="position:absolute;inset:0;"></div>
+
+  <div style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;opacity:.12;filter:blur(5px);">
+    <div class="time-block glass-dark">
+      <div style="font-size:62px;font-weight:300;color:#f0edff;font-family:'Inter',monospace;">47:23</div>
+    </div>
+  </div>
+
+  <div class="modal-bg">
+    <div class="modal-card glass-dark anim-fade" style="text-align:center;">
+
+      <div style="display:flex;justify-content:center;margin-bottom:20px;">
+        <div style="width:52px;height:52px;border-radius:18px;
+          background:rgba(52,211,153,.12);border:1px solid rgba(52,211,153,.28);
+          display:flex;align-items:center;justify-content:center;">
+          <i class="fas fa-check" style="font-size:20px;color:#34d399;"></i>
+        </div>
+      </div>
+
+      <h2 style="font-size:19px;font-weight:600;margin:0 0 8px;color:#ece8ff;">
+        10 分钟已经结束
+      </h2>
+      <p style="font-size:13px;color:rgba(255,255,255,.4);margin:0 0 6px;">
+        现在你想怎么选择？
+      </p>
+      <p style="font-size:11px;color:rgba(255,255,255,.22);margin:0 0 28px;">
+        无论你选择什么，都请温柔对待自己。
+      </p>
+
+      <div style="display:flex;flex-direction:column;gap:10px;">
+        <button onclick="show('s-focus')" class="btn-primary"
+          style="padding:16px;border-radius:16px;font-size:14px;font-weight:600;
+            display:flex;align-items:center;justify-content:center;gap:10px;">
+          <i class="fas fa-arrow-rotate-left" style="font-size:13px;"></i>
+          回到任务
+        </button>
+        <button onclick="show('s-create')" class="btn-ghost"
+          style="padding:14px;border-radius:16px;font-size:13px;
+            display:flex;align-items:center;justify-content:center;gap:8px;
+            color:rgba(255,255,255,.45);">
+          确认离开，下次再来
+        </button>
+      </div>
+
+      <p style="font-size:11px;color:rgba(255,255,255,.18);margin-top:22px;line-height:1.6;">
+        今天能坚持到这里，已经很了不起了。
+      </p>
+    </div>
+  </div>
+</div>
+
+
+<!-- ════════════════════════════════════════
+     EMERGENCY EXIT SCREEN (brief blessing)
+     ════════════════════════════════════════ -->
+<div id="s-emergency" class="screen">
+  <div style="position:absolute;inset:0;background:#08080f;"></div>
+  <div style="position:relative;z-index:1;text-align:center;padding:40px;">
+    <div style="font-size:36px;margin-bottom:24px;">🌙</div>
+    <h2 style="font-size:22px;font-weight:600;color:#ece8ff;margin:0 0 12px;">去处理吧</h2>
+    <p style="font-size:14px;color:rgba(255,255,255,.45);line-height:1.8;margin:0 0 36px;">
+      无论发生什么，都照顾好自己。<br>专注空间随时都在，等你回来。
+    </p>
+    <button onclick="show('s-create')" class="btn-primary"
+      style="padding:14px 36px;border-radius:14px;font-size:14px;">
+      回到主页
+    </button>
+  </div>
+</div>
+
+
+<!-- ── Demo nav (floating) ── -->
+<div id="demo-nav" style="position:fixed;bottom:20px;right:20px;z-index:999;
+  display:flex;flex-direction:column;gap:6px;align-items:flex-end;">
+  <div class="glass-dark" style="border-radius:14px;padding:12px 16px;font-size:11px;
+    color:rgba(255,255,255,.35);line-height:2;">
+    <div style="font-size:10px;color:rgba(255,255,255,.25);margin-bottom:6px;letter-spacing:.08em;">原型导航</div>
+    <div style="display:flex;flex-direction:column;gap:4px;">
+      <button onclick="show('s-create')"  style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">① 创建专注空间</button>
+      <button onclick="show('s-focus')"   style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">② 全屏专注空间</button>
+      <button onclick="show('s-exit-1')" style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">③ 退出挽留 · 判断</button>
+      <button onclick="show('s-exit-2')" style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">④ 退出挽留 · 写下想法</button>
+      <button onclick="show('s-exit-3')" style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">⑤ 冷静 10 分钟</button>
+      <button onclick="show('s-exit-4')" style="text-align:left;background:none;border:none;color:rgba(255,255,255,.45);cursor:pointer;font-size:11px;">⑥ 冷静结束 · 做选择</button>
+    </div>
+  </div>
+</div>
+
+
+<script>
+// ── Background theme map ──
+const bgMap = {
+  rain:    'https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=1920&q=80',
+  library: 'https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=1920&q=80',
+  forest:  'https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=1920&q=80',
+  cyber:   'https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=1920&q=80',
+};
+let currentTheme = 'rain';
+
+// ── Screen switcher ──
+function show(id) {
+  document.querySelectorAll('.screen').forEach(s => {
+    s.style.display = 'none';
+    s.classList.remove('active');
+  });
+  const t = document.getElementById(id);
+  if (!t) return;
+  t.style.display = 'flex';
+  t.classList.add('active');
+  // re-trigger animation
+  t.querySelectorAll('.anim-fade').forEach(el => {
+    el.style.animation = 'none';
+    el.offsetHeight;
+    el.style.animation = '';
+  });
+}
+
+// Init
+show('s-create');
+
+// ── Create screen: selection helpers ──
+let selectedDur = 50;
+function pickDur(el, mins) {
+  el.closest('div').querySelectorAll('.dur-pill').forEach(p => p.classList.remove('sel'));
+  el.classList.add('sel');
+  selectedDur = mins;
+}
+
+function pickTheme(name) {
+  currentTheme = name;
+  ['rain','library','forest','cyber'].forEach(k => {
+    const el = document.getElementById('tc-' + k);
+    el.classList.remove('sel');
+    const chk = el.querySelector('.tc-check');
+    if (chk) chk.remove();
+  });
+  const chosen = document.getElementById('tc-' + name);
+  chosen.classList.add('sel');
+  const chk = document.createElement('div');
+  chk.className = 'tc-check';
+  chk.innerHTML = '<i class="fas fa-check"></i>';
+  chosen.appendChild(chk);
+  // update all bg images
+  const url = bgMap[name];
+  document.querySelectorAll('.screen .bg-img').forEach(el => {
+    el.style.setProperty('--bg', `url('${url}')`);
+    el.style.backgroundImage = `url('${url}')`;
+  });
+}
+
+function pickStyle(el, style) {
+  el.closest('div').querySelectorAll('.style-card').forEach(c => c.classList.remove('sel'));
+  el.classList.add('sel');
+}
+
+// ── Go to focus ──
+function goFocus() {
+  const taskName = document.getElementById('task-name').value.trim() || '写论文 introduction';
+  document.getElementById('disp-task').textContent = taskName;
+  focusSecs = selectedDur * 60 || 50 * 60;
+  focusTotal = focusSecs;
+  focusSecs = Math.max(focusSecs - 97, 0); // demo: already 97s in
+  show('s-focus');
+}
+
+// ── Focus timer ──
+let focusTotal = 50 * 60;
+let focusSecs  = 47 * 60 + 23;
+let focusTick  = null;
+
+function startFocusTick() {
+  clearInterval(focusTick);
+  focusTick = setInterval(() => {
+    if (focusSecs > 0) focusSecs--;
+    const m = String(Math.floor(focusSecs / 60)).padStart(2,'0');
+    const s = String(focusSecs % 60).padStart(2,'0');
+    const cl = document.getElementById('focus-clock');
+    if (cl) cl.textContent = `${m}:${s}`;
+    const elapsed = focusTotal - focusSecs;
+    const pct = Math.min(100, Math.round((elapsed / focusTotal) * 100));
+    const bar = document.getElementById('focus-bar');
+    const pctEl = document.getElementById('focus-pct');
+    if (bar) bar.style.width = pct + '%';
+    if (pctEl) pctEl.textContent = pct + '%';
+  }, 1000);
+}
+startFocusTick();
+
+// ── Cool-down timer ──
+let coolSecs   = 10 * 60;
+const coolTotal = 10 * 60;
+const circum    = 2 * Math.PI * 56; // 351.86
+let coolTick    = null;
+let coolRunning = false;
+
+function startCooldown() {
+  show('s-exit-3');
+  if (coolRunning) return;
+  coolRunning = true;
+  coolSecs = coolTotal;
+  document.getElementById('cool-clock').textContent = '10:00';
+  const ring = document.getElementById('cool-ring');
+  if (ring) { ring.style.strokeDashoffset = '0'; }
+  clearInterval(coolTick);
+  coolTick = setInterval(() => {
+    if (coolSecs > 0) {
+      coolSecs--;
+    }
+    const m = String(Math.floor(coolSecs / 60)).padStart(2,'0');
+    const s = String(coolSecs % 60).padStart(2,'0');
+    const cl = document.getElementById('cool-clock');
+    if (cl) cl.textContent = `${m}:${s}`;
+    const ring = document.getElementById('cool-ring');
+    if (ring) {
+      const offset = circum * (coolSecs / coolTotal);
+      ring.style.strokeDashoffset = offset;
+    }
+    if (coolSecs === 0) {
+      clearInterval(coolTick);
+      coolRunning = false;
+      setTimeout(() => show('s-exit-4'), 1400);
+    }
+  }, 1000);
+}
+
+// ── Emergency exit ──
+function emergencyExit() {
+  show('s-emergency');
+}
+
+// ── Rotate gentle messages ──
+const gentleMessages = [
+  "你不需要完成所有事。<br>只是继续待着，就已经很好了。",
+  "冲动像浪潮，会来，也会退去。<br>你现在只需要等待。",
+  "写下那些想法，是为了看清它，<br>不是为了评判你自己。",
+  "10 分钟很短，<br>也足够深呼吸几次。",
+  "任何时候回来，都不算晚。<br>你一直都有选择权。",
+];
+let msgIdx = 0;
+setInterval(() => {
+  const el = document.getElementById('cool-msg');
+  if (!el) return;
+  el.style.opacity = '0';
+  setTimeout(() => {
+    msgIdx = (msgIdx + 1) % gentleMessages.length;
+    el.innerHTML = gentleMessages[msgIdx];
+    el.style.opacity = '1';
+  }, 450);
+}, 5000);
+</script>
+</body>
+</html>

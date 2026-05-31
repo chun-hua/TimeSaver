@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">挽留者</string>
+    <string name="create_title">创建专注空间</string>
+    <string name="task_hint">例如：写论文 introduction</string>
+    <string name="duration_label">专注时长</string>
+    <string name="theme_label">背景主题</string>
+    <string name="style_label">时间窗口样式</string>
+    <string name="start_focus">进入专注空间</string>
+    <string name="exit_button">退出</string>
+    <string name="focusing">专注中</string>
+    <string name="emergency_question">这是紧急情况吗？</string>
+    <string name="emergency_yes">是，这是紧急情况 — 立即退出</string>
+    <string name="emergency_no">不是，我只是想离开一下</string>
+    <string name="write_reason_title">你现在想去做什么？</string>
+    <string name="write_reason_subtitle">写下来，不是为了批评你，只是让冲动慢一点。</string>
+    <string name="start_cooldown">我写好了，先冷静 10 分钟</string>
+    <string name="cooldown_title">先冷静 10 分钟</string>
+    <string name="cooldown_subtitle_1">冲动会升起，也会下降。</string>
+    <string name="cooldown_subtitle_2">你仍然有选择权。</string>
+    <string name="back_to_focus">回到任务</string>
+    <string name="confirm_exit">确认离开，下次再来</string>
+    <string name="emergency_title">去处理吧</string>
+    <string name="emergency_message">无论发生什么，都照顾好自己。专注空间随时都在，等你回来。</string>
+    <string name="go_home">回到主页</string>
+</resources>
