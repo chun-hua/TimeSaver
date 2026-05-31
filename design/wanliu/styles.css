@@ -422,6 +422,87 @@ input:focus, textarea:focus {
 /* scrollbar */
 .device-screen ::-webkit-scrollbar { width:0; }
 
+/* ─────────────────────────────────────────────
+   COMPANION — 陪伴者 (create-screen picker)
+   ───────────────────────────────────────────── */
+.companion-sub { font-size:12px; color: var(--ink-faint); margin:-4px 0 12px; line-height:1.6; }
+.companion-row {
+  display:flex; gap:10px; overflow-x:auto; padding:2px 1px 6px;
+  scroll-snap-type:x proximity; -webkit-overflow-scrolling:touch;
+}
+.companion-row::-webkit-scrollbar { height:0; }
+.companion-card {
+  flex:0 0 auto; width:84px; scroll-snap-align:start;
+  display:flex; flex-direction:column; align-items:center; gap:9px;
+  padding:13px 8px 11px; border-radius:18px; cursor:pointer;
+  border:1.5px solid rgba(255,255,255,.08); background: rgba(255,255,255,.03);
+  transition: border-color .25s ease, background .25s ease, transform .25s ease;
+}
+.companion-card:hover { transform: translateY(-3px); }
+.companion-card.sel {
+  border-color: rgba(139,92,246,.9);
+  background: rgba(139,92,246,.1);
+  box-shadow: 0 0 26px rgba(124,58,237,.28);
+}
+.cc-orb {
+  position:relative; width:58px; height:58px; border-radius:50%;
+  display:block;
+  background:
+    radial-gradient(circle at 50% 42%, rgba(125,211,252,.16), transparent 62%),
+    radial-gradient(circle at 50% 100%, rgba(167,139,250,.18), transparent 70%),
+    #05070f;
+  border:1px solid rgba(125,211,252,.14);
+  box-shadow: inset 0 0 18px rgba(8,14,28,.9);
+}
+.companion-card.sel .cc-orb { border-color: rgba(167,139,250,.5); box-shadow: 0 0 22px rgba(167,139,250,.22), inset 0 0 18px rgba(8,14,28,.9); }
+.cc-orb.cc-none {
+  display:flex; align-items:center; justify-content:center;
+  color: var(--ink-faint); font-size:18px; background:#0a0a16;
+}
+.cc-name { font-size:12px; font-weight:500; color: var(--ink-soft); white-space:nowrap; }
+.companion-card.sel .cc-name { color: var(--ink); }
+.cc-quote { font-size:9px; color: var(--ink-ghost); letter-spacing:.02em; max-width:74px; text-align:center; line-height:1.3; }
+
+/* ─────────────────────────────────────────────
+   COMPANION — focus-screen particle stage
+   ───────────────────────────────────────────── */
+.focus-center.has-companion {
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  align-items: center;
+}
+.focus-center.has-companion .time-block { margin-top: 4px; }
+.device.landscape .focus-center.has-companion { flex-direction: row; gap: 18px; }
+
+.companion-stage {
+  display:none;
+  position:relative;
+  width: min(330px, 86%);
+  height: 224px;
+  flex:0 0 auto;
+}
+.focus-center.has-companion .companion-stage { display:block; }
+.device.landscape .companion-stage { width: 300px; height: 300px; }
+
+.companion-stage canvas { position:absolute; inset:0; width:100%; height:100%; display:block; }
+.companion-stage::after {
+  content:""; position:absolute; inset:0; pointer-events:none;
+  background: repeating-linear-gradient(to bottom,
+    rgba(180,220,255,.05) 0px, rgba(180,220,255,.05) 1px,
+    transparent 1px, transparent 5px);
+  mix-blend-mode: screen; opacity:.4;
+}
+.companion-cap {
+  position:absolute; left:0; right:0; bottom:6px; text-align:center;
+  font-size:11px; color: rgba(214,232,255,.6); letter-spacing:.04em;
+  pointer-events:none;
+}
+.companion-cap b { color: rgba(125,211,252,.92); font-weight:600; }
+.companion-cap .companion-quote {
+  margin-top:3px; font-size:10px; color: rgba(214,232,255,.34); font-style:italic;
+}
+
 /* utilities */
 .anim-float   { animation: float 7s ease-in-out infinite; }
 .anim-breathe { animation: breathe 4.5s ease-in-out infinite; }

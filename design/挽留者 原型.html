@@ -1,331 +1,931 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>挽留者 — 沉浸式专注空间</title>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="wanliu/styles.css">
-</head>
-<body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
+    />
+    <title>挽留者 — 沉浸式专注空间</title>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@200;300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="wanliu/styles.css" />
+  </head>
+  <body>
+    <div id="stage">
+      <div id="device-scaler">
+        <div class="device" id="device">
+          <div class="device-screen">
+            <!-- Dynamic Island + status bar (shared chrome) -->
+            <div class="island"></div>
+            <div class="statusbar">
+              <span class="sb-time">9:41</span>
+              <div class="sb-right">
+                <i class="fas fa-signal" style="font-size: 12px"></i>
+                <i class="fas fa-wifi" style="font-size: 12px"></i>
+                <i
+                  class="fas fa-battery-three-quarters"
+                  style="font-size: 14px"
+                ></i>
+              </div>
+            </div>
+            <div class="home-indicator"></div>
 
-<div id="stage">
-  <div id="device-scaler">
-    <div class="device" id="device">
-      <div class="device-screen">
-
-        <!-- Dynamic Island + status bar (shared chrome) -->
-        <div class="island"></div>
-        <div class="statusbar">
-          <span class="sb-time">9:41</span>
-          <div class="sb-right">
-            <i class="fas fa-signal" style="font-size:12px;"></i>
-            <i class="fas fa-wifi" style="font-size:12px;"></i>
-            <i class="fas fa-battery-three-quarters" style="font-size:14px;"></i>
-          </div>
-        </div>
-        <div class="home-indicator"></div>
-
-        <!-- ══════════════════════════════════════
+            <!-- ══════════════════════════════════════
              SCREEN 1 · CREATE FOCUS SPACE
              ══════════════════════════════════════ -->
-        <div id="s-create" class="screen active" data-screen-label="创建专注空间">
-          <div style="position:absolute;inset:0;pointer-events:none;background:
-            radial-gradient(ellipse 60% 50% at 18% 30%, rgba(88,28,135,.22) 0%, transparent 65%),
-            radial-gradient(ellipse 55% 45% at 88% 78%, rgba(49,46,129,.26) 0%, transparent 60%),
-            var(--bg-deep);"></div>
+            <div
+              id="s-create"
+              class="screen active"
+              data-screen-label="创建专注空间"
+            >
+              <div
+                style="
+                  position: absolute;
+                  inset: 0;
+                  pointer-events: none;
+                  background:
+                    radial-gradient(
+                      ellipse 60% 50% at 18% 30%,
+                      rgba(88, 28, 135, 0.22) 0%,
+                      transparent 65%
+                    ),
+                    radial-gradient(
+                      ellipse 55% 45% at 88% 78%,
+                      rgba(49, 46, 129, 0.26) 0%,
+                      transparent 60%
+                    ),
+                    var(--bg-deep);
+                "
+              ></div>
 
-          <div class="scroll" style="position:relative;z-index:1;">
-            <!-- Header -->
-            <div class="create-head">
-              <div style="display:flex;align-items:center;gap:12px;margin-bottom:9px;">
-                <div class="brand-badge"><i class="fas fa-moon" style="color:#fff;font-size:16px;"></i></div>
-                <div>
-                  <h1 style="font-size:22px;font-weight:600;color:var(--ink);margin:0;line-height:1.1;">创建专注空间</h1>
+              <div class="scroll" style="position: relative; z-index: 1">
+                <!-- Header -->
+                <div class="create-head">
+                  <div
+                    style="
+                      display: flex;
+                      align-items: center;
+                      gap: 12px;
+                      margin-bottom: 9px;
+                    "
+                  >
+                    <div class="brand-badge">
+                      <i
+                        class="fas fa-moon"
+                        style="color: #fff; font-size: 16px"
+                      ></i>
+                    </div>
+                    <div>
+                      <h1
+                        style="
+                          font-size: 22px;
+                          font-weight: 600;
+                          color: var(--ink);
+                          margin: 0;
+                          line-height: 1.1;
+                        "
+                      >
+                        创建专注空间
+                      </h1>
+                    </div>
+                  </div>
+                  <p
+                    style="font-size: 13px; color: var(--ink-faint); margin: 0"
+                  >
+                    给自己一段完整的时间，不被打扰。
+                  </p>
+                </div>
+
+                <div class="create-grid">
+                  <!-- Task -->
+                  <div class="span-2">
+                    <div class="form-label">
+                      <i class="fas fa-pen-to-square"></i>当前任务
+                    </div>
+                    <input
+                      type="text"
+                      id="task-name"
+                      placeholder="例如：写论文 introduction"
+                      autocomplete="off"
+                    />
+                    <div class="hint-err" id="task-hint">
+                      给这段时间起个名字吧，哪怕只是一个词。
+                    </div>
+                  </div>
+
+                  <!-- Duration -->
+                  <div>
+                    <div class="form-label">
+                      <i class="fas fa-hourglass-half"></i>专注时长
+                    </div>
+                    <div class="dur-row" id="dur-row">
+                      <div class="dur-pill" onclick="pickDur(this, 25)">
+                        25 分钟
+                      </div>
+                      <div class="dur-pill sel" onclick="pickDur(this, 50)">
+                        50 分钟
+                      </div>
+                      <div class="dur-pill" onclick="pickDur(this, 90)">
+                        90 分钟
+                      </div>
+                      <div class="dur-pill" onclick="pickDur(this, 0)">
+                        自定义
+                      </div>
+                    </div>
+                    <div id="custom-dur-wrap">
+                      <div
+                        style="display: flex; align-items: center; gap: 10px"
+                      >
+                        <input
+                          type="number"
+                          id="custom-dur"
+                          min="1"
+                          max="180"
+                          placeholder="30"
+                          value="30"
+                          oninput="onCustomDur(this.value)"
+                          style="
+                            padding: 13px 15px;
+                            border-radius: 14px;
+                            font-size: 14px;
+                            font-family: &quot;Inter&quot;, monospace;
+                            text-align: center;
+                            width: 90px;
+                          "
+                        />
+                        <span style="font-size: 13px; color: var(--ink-faint)"
+                          >分钟（1–180）</span
+                        >
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Style -->
+                  <div>
+                    <div class="form-label">
+                      <i class="fas fa-layer-group"></i>时间窗口样式
+                    </div>
+                    <div class="style-row">
+                      <div
+                        class="style-card"
+                        onclick="pickStyle(this, 'minimal')"
+                      >
+                        <div
+                          class="preview-text"
+                          style="color: #a78bfa; font-weight: 300"
+                        >
+                          24:00
+                        </div>
+                        <div class="label">极简</div>
+                      </div>
+                      <div
+                        class="style-card sel"
+                        onclick="pickStyle(this, 'glass')"
+                      >
+                        <div
+                          class="preview-text glass"
+                          style="
+                            display: inline-block;
+                            padding: 2px 9px;
+                            border-radius: 8px;
+                            color: var(--ink);
+                          "
+                        >
+                          24:00
+                        </div>
+                        <div class="label" style="margin-top: 7px">玻璃</div>
+                      </div>
+                      <div class="style-card" onclick="pickStyle(this, 'note')">
+                        <div
+                          class="preview-text"
+                          style="
+                            display: inline-block;
+                            padding: 2px 9px;
+                            border-radius: 6px;
+                            background: #fdf3d3;
+                            color: #3a2c12;
+                            font-size: 15px;
+                          "
+                        >
+                          24:00
+                        </div>
+                        <div class="label" style="margin-top: 7px">便利贴</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Theme -->
+                  <div class="span-2">
+                    <div class="form-label">
+                      <i class="fas fa-photo-film"></i>背景主题
+                    </div>
+                    <div class="theme-grid">
+                      <div
+                        class="theme-card sel"
+                        id="tc-rain"
+                        onclick="pickTheme('rain')"
+                      >
+                        <div
+                          class="tc-img"
+                          style="
+                            background-image: url(&quot;https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=500&q=70&quot;);
+                          "
+                        ></div>
+                        <div class="tc-dim"></div>
+                        <div class="tc-label">
+                          <i
+                            class="fas fa-cloud-rain"
+                            style="font-size: 18px"
+                          ></i
+                          ><span>雨夜</span>
+                        </div>
+                        <div class="tc-check"><i class="fas fa-check"></i></div>
+                      </div>
+                      <div
+                        class="theme-card"
+                        id="tc-library"
+                        onclick="pickTheme('library')"
+                      >
+                        <div
+                          class="tc-img"
+                          style="
+                            background-image: url(&quot;https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=70&quot;);
+                          "
+                        ></div>
+                        <div class="tc-dim"></div>
+                        <div class="tc-label">
+                          <i
+                            class="fas fa-book-open"
+                            style="font-size: 18px"
+                          ></i
+                          ><span>图书馆</span>
+                        </div>
+                        <div class="tc-check"><i class="fas fa-check"></i></div>
+                      </div>
+                      <div
+                        class="theme-card"
+                        id="tc-forest"
+                        onclick="pickTheme('forest')"
+                      >
+                        <div
+                          class="tc-img"
+                          style="
+                            background-image: url(&quot;https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&q=70&quot;);
+                          "
+                        ></div>
+                        <div class="tc-dim"></div>
+                        <div class="tc-label">
+                          <i class="fas fa-tree" style="font-size: 18px"></i
+                          ><span>森林</span>
+                        </div>
+                        <div class="tc-check"><i class="fas fa-check"></i></div>
+                      </div>
+                      <div
+                        class="theme-card"
+                        id="tc-cyber"
+                        onclick="pickTheme('cyber')"
+                      >
+                        <div
+                          class="tc-img"
+                          style="
+                            background-image: url(&quot;https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=70&quot;);
+                          "
+                        ></div>
+                        <div class="tc-dim"></div>
+                        <div class="tc-label">
+                          <i class="fas fa-desktop" style="font-size: 18px"></i
+                          ><span>赛博桌面</span>
+                        </div>
+                        <div class="tc-check"><i class="fas fa-check"></i></div>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Companion -->
+                  <div class="span-2">
+                    <div class="form-label">
+                      <i class="fas fa-user-astronaut"></i>陪伴者
+                      <span
+                        style="
+                          font-weight: 400;
+                          color: var(--ink-ghost);
+                          letter-spacing: 0;
+                          margin-left: 2px;
+                        "
+                        >可选</span
+                      >
+                    </div>
+                    <p class="companion-sub">
+                      选一位大师陪你工作。Ta
+                      的粒子影像会浮现在专注计时的上方，安静地陪着你。
+                    </p>
+                    <div class="companion-row" id="companion-row">
+                      <div
+                        class="companion-card sel"
+                        data-comp="none"
+                        onclick="pickCompanion('none')"
+                      >
+                        <span class="cc-orb cc-none"
+                          ><i class="fas fa-circle-half-stroke"></i
+                        ></span>
+                        <span class="cc-name">独自专注</span>
+                        <span class="cc-quote">保持当前界面</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="jobs"
+                        onclick="pickCompanion('jobs')"
+                      >
+                        <canvas class="cc-orb" data-comp="jobs"></canvas>
+                        <span class="cc-name">乔布斯</span>
+                        <span class="cc-quote">求知若饥，虚心若愚</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="munger"
+                        onclick="pickCompanion('munger')"
+                      >
+                        <canvas class="cc-orb" data-comp="munger"></canvas>
+                        <span class="cc-name">芒格</span>
+                        <span class="cc-quote">反过来想，总是反过来想</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="einstein"
+                        onclick="pickCompanion('einstein')"
+                      >
+                        <canvas class="cc-orb" data-comp="einstein"></canvas>
+                        <span class="cc-name">爱因斯坦</span>
+                        <span class="cc-quote">想象力比知识更重要</span>
+                      </div>
+                      <div
+                        class="companion-card"
+                        data-comp="davinci"
+                        onclick="pickCompanion('davinci')"
+                      >
+                        <canvas class="cc-orb" data-comp="davinci"></canvas>
+                        <span class="cc-name">达·芬奇</span>
+                        <span class="cc-quote">简约，是终极的精致</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Start -->
+                  <div class="span-2" style="margin-top: 4px">
+                    <button
+                      onclick="goFocus()"
+                      class="btn-primary"
+                      style="
+                        width: 100%;
+                        padding: 16px;
+                        border-radius: 18px;
+                        font-size: 15px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                      "
+                    >
+                      <i class="fas fa-play" style="font-size: 12px"></i>
+                      进入专注空间
+                    </button>
+                    <p
+                      style="
+                        text-align: center;
+                        font-size: 11px;
+                        color: var(--ink-ghost);
+                        margin: 13px 0 0;
+                      "
+                    >
+                      进入后计时自动开始 · 随时可以温和退出
+                    </p>
+                  </div>
                 </div>
               </div>
-              <p style="font-size:13px;color:var(--ink-faint);margin:0;">给自己一段完整的时间，不被打扰。</p>
             </div>
 
-            <div class="create-grid">
-              <!-- Task -->
-              <div class="span-2">
-                <div class="form-label"><i class="fas fa-pen-to-square"></i>当前任务</div>
-                <input type="text" id="task-name" placeholder="例如：写论文 introduction" autocomplete="off">
-                <div class="hint-err" id="task-hint">给这段时间起个名字吧，哪怕只是一个词。</div>
-              </div>
-
-              <!-- Duration -->
-              <div>
-                <div class="form-label"><i class="fas fa-hourglass-half"></i>专注时长</div>
-                <div class="dur-row" id="dur-row">
-                  <div class="dur-pill" onclick="pickDur(this,25)">25 分钟</div>
-                  <div class="dur-pill sel" onclick="pickDur(this,50)">50 分钟</div>
-                  <div class="dur-pill" onclick="pickDur(this,90)">90 分钟</div>
-                  <div class="dur-pill" onclick="pickDur(this,0)">自定义</div>
-                </div>
-                <div id="custom-dur-wrap">
-                  <div style="display:flex;align-items:center;gap:10px;">
-                    <input type="number" id="custom-dur" min="1" max="180" placeholder="30" value="30"
-                      oninput="onCustomDur(this.value)" style="padding:13px 15px;border-radius:14px;font-size:14px;font-family:'Inter',monospace;text-align:center;width:90px;">
-                    <span style="font-size:13px;color:var(--ink-faint);">分钟（1–180）</span>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Style -->
-              <div>
-                <div class="form-label"><i class="fas fa-layer-group"></i>时间窗口样式</div>
-                <div class="style-row">
-                  <div class="style-card" onclick="pickStyle(this,'minimal')">
-                    <div class="preview-text" style="color:#a78bfa;font-weight:300;">24:00</div>
-                    <div class="label">极简</div>
-                  </div>
-                  <div class="style-card sel" onclick="pickStyle(this,'glass')">
-                    <div class="preview-text glass" style="display:inline-block;padding:2px 9px;border-radius:8px;color:var(--ink);">24:00</div>
-                    <div class="label" style="margin-top:7px;">玻璃</div>
-                  </div>
-                  <div class="style-card" onclick="pickStyle(this,'note')">
-                    <div class="preview-text" style="display:inline-block;padding:2px 9px;border-radius:6px;background:#fdf3d3;color:#3a2c12;font-size:15px;">24:00</div>
-                    <div class="label" style="margin-top:7px;">便利贴</div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Theme -->
-              <div class="span-2">
-                <div class="form-label"><i class="fas fa-photo-film"></i>背景主题</div>
-                <div class="theme-grid">
-                  <div class="theme-card sel" id="tc-rain" onclick="pickTheme('rain')">
-                    <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1519692933481-e162a57d6721?w=500&q=70');"></div>
-                    <div class="tc-dim"></div>
-                    <div class="tc-label"><i class="fas fa-cloud-rain" style="font-size:18px;"></i><span>雨夜</span></div>
-                    <div class="tc-check"><i class="fas fa-check"></i></div>
-                  </div>
-                  <div class="theme-card" id="tc-library" onclick="pickTheme('library')">
-                    <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1481627834876-b7833e8f5570?w=500&q=70');"></div>
-                    <div class="tc-dim"></div>
-                    <div class="tc-label"><i class="fas fa-book-open" style="font-size:18px;"></i><span>图书馆</span></div>
-                    <div class="tc-check"><i class="fas fa-check"></i></div>
-                  </div>
-                  <div class="theme-card" id="tc-forest" onclick="pickTheme('forest')">
-                    <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?w=500&q=70');"></div>
-                    <div class="tc-dim"></div>
-                    <div class="tc-label"><i class="fas fa-tree" style="font-size:18px;"></i><span>森林</span></div>
-                    <div class="tc-check"><i class="fas fa-check"></i></div>
-                  </div>
-                  <div class="theme-card" id="tc-cyber" onclick="pickTheme('cyber')">
-                    <div class="tc-img" style="background-image:url('https://images.unsplash.com/photo-1536599018102-9f803c140fc1?w=500&q=70');"></div>
-                    <div class="tc-dim"></div>
-                    <div class="tc-label"><i class="fas fa-desktop" style="font-size:18px;"></i><span>赛博桌面</span></div>
-                    <div class="tc-check"><i class="fas fa-check"></i></div>
-                  </div>
-                </div>
-              </div>
-
-              <!-- Start -->
-              <div class="span-2" style="margin-top:4px;">
-                <button onclick="goFocus()" class="btn-primary"
-                  style="width:100%;padding:16px;border-radius:18px;font-size:15px;display:flex;align-items:center;justify-content:center;gap:10px;">
-                  <i class="fas fa-play" style="font-size:12px;"></i> 进入专注空间
-                </button>
-                <p style="text-align:center;font-size:11px;color:var(--ink-ghost);margin:13px 0 0;">
-                  进入后计时自动开始 · 随时可以温和退出
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══════════════════════════════════════
+            <!-- ══════════════════════════════════════
              SCREEN 2 · FOCUS SPACE
              ══════════════════════════════════════ -->
-        <div id="s-focus" class="screen" data-screen-label="全屏专注空间">
-          <div class="bg-layer"></div>
-          <canvas class="bg-canvas"></canvas>
-          <div class="bg-overlay"></div>
-          <div class="bg-vignette"></div>
+            <div id="s-focus" class="screen" data-screen-label="全屏专注空间">
+              <div class="bg-layer"></div>
+              <canvas class="bg-canvas"></canvas>
+              <div class="bg-overlay"></div>
+              <div class="bg-vignette"></div>
 
-          <div class="focus-topbar">
-            <button onclick="show('s-exit-1')" class="btn-ghost exit-btn">
-              <i class="fas fa-xmark" style="font-size:11px;"></i><span>退出</span>
-            </button>
-            <div class="status-chip">
-              <div class="dot-pulse" style="width:6px;height:6px;border-radius:50%;background:#34d399;"></div>
-              <span>专注中</span>
-            </div>
-          </div>
-
-          <div class="focus-center">
-            <div class="time-block glass-dark anim-float" id="time-block">
-              <div class="tb-tasklabel">当前任务</div>
-              <div class="tb-task" id="disp-task" style="margin-bottom:24px;">写论文 introduction</div>
-              <div class="tb-clock" id="focus-clock" style="margin-bottom:26px;">50:00</div>
-              <div style="margin-bottom:22px;">
-                <div class="tb-prog-row" style="display:flex;justify-content:space-between;font-size:11px;color:var(--ink-faint);margin-bottom:9px;">
-                  <span>专注进度</span><span id="focus-pct">0%</span>
+              <div class="focus-topbar">
+                <button onclick="show('s-exit-1')" class="btn-ghost exit-btn">
+                  <i class="fas fa-xmark" style="font-size: 11px"></i
+                  ><span>退出</span>
+                </button>
+                <div class="status-chip">
+                  <div
+                    class="dot-pulse"
+                    style="
+                      width: 6px;
+                      height: 6px;
+                      border-radius: 50%;
+                      background: #34d399;
+                    "
+                  ></div>
+                  <span>专注中</span>
                 </div>
-                <div class="prog-track"><div class="prog-fill" id="focus-bar" style="width:0%;"></div></div>
               </div>
-              <div class="tb-msg anim-breathe">先留下这一段时间，不用追求完美。</div>
-            </div>
-          </div>
 
-          <div class="ambient-tag">
-            <div style="display:flex;align-items:center;gap:9px;">
-              <div class="bars">
-                <span style="animation-delay:0s;"></span><span style="animation-delay:.2s;"></span>
-                <span style="animation-delay:.4s;"></span><span style="animation-delay:.15s;"></span>
+              <div class="focus-center" id="focus-center">
+                <div class="companion-stage" id="companion-stage">
+                  <canvas id="companion-canvas"></canvas>
+                  <div class="companion-cap">
+                    <b id="companion-cap-name">乔布斯</b> 正在陪你专注
+                    <div class="companion-quote" id="companion-cap-quote">
+                      求知若饥，虚心若愚
+                    </div>
+                  </div>
+                </div>
+                <div class="time-block glass-dark anim-float" id="time-block">
+                  <div class="tb-tasklabel">当前任务</div>
+                  <div
+                    class="tb-task"
+                    id="disp-task"
+                    style="margin-bottom: 24px"
+                  >
+                    写论文 introduction
+                  </div>
+                  <div
+                    class="tb-clock"
+                    id="focus-clock"
+                    style="margin-bottom: 26px"
+                  >
+                    50:00
+                  </div>
+                  <div style="margin-bottom: 22px">
+                    <div
+                      class="tb-prog-row"
+                      style="
+                        display: flex;
+                        justify-content: space-between;
+                        font-size: 11px;
+                        color: var(--ink-faint);
+                        margin-bottom: 9px;
+                      "
+                    >
+                      <span>专注进度</span><span id="focus-pct">0%</span>
+                    </div>
+                    <div class="prog-track">
+                      <div
+                        class="prog-fill"
+                        id="focus-bar"
+                        style="width: 0%"
+                      ></div>
+                    </div>
+                  </div>
+                  <div class="tb-msg anim-breathe">
+                    先留下这一段时间，不用追求完美。
+                  </div>
+                </div>
               </div>
-              <span id="ambient-name">雨夜 氛围 · 循环播放</span>
-            </div>
-          </div>
-        </div>
 
-        <!-- ══════════════════════════════════════
+              <div class="ambient-tag">
+                <div style="display: flex; align-items: center; gap: 9px">
+                  <div class="bars">
+                    <span style="animation-delay: 0s"></span
+                    ><span style="animation-delay: 0.2s"></span>
+                    <span style="animation-delay: 0.4s"></span
+                    ><span style="animation-delay: 0.15s"></span>
+                  </div>
+                  <span id="ambient-name">雨夜 氛围 · 循环播放</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ══════════════════════════════════════
              SCREEN 3 · EXIT STEP 1 — EMERGENCY?
              ══════════════════════════════════════ -->
-        <div id="s-exit-1" class="screen" data-screen-label="退出挽留·判断">
-          <div class="bg-layer"></div>
-          <canvas class="bg-canvas"></canvas>
-          <div class="bg-overlay"></div>
-          <div class="modal-bg">
-            <div class="modal-card glass-dark">
-              <div class="modal-icon"><i class="fas fa-circle-question" style="font-size:23px;color:#a78bfa;"></i></div>
-              <h2 class="modal-h">你想离开了吗？</h2>
-              <p class="modal-p">这是紧急情况吗？</p>
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="emergencyExit()" class="btn-danger-soft" style="padding:14px;border-radius:14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                  <i class="fas fa-triangle-exclamation"></i> 是，这是紧急情况 — 立即退出
-                </button>
-                <button onclick="show('s-exit-2')" class="btn-primary" style="padding:14px;border-radius:14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                  <i class="fas fa-leaf" style="font-size:12px;"></i> 不是，我只是想离开一下
-                </button>
-              </div>
-              <p class="modal-foot">如果是紧急情况，我们不会留你。</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══════════════════════════════════════
-             SCREEN 4 · EXIT STEP 2 — WRITE REASON
-             ══════════════════════════════════════ -->
-        <div id="s-exit-2" class="screen" data-screen-label="退出挽留·写下想法">
-          <div class="bg-layer"></div>
-          <canvas class="bg-canvas"></canvas>
-          <div class="bg-overlay"></div>
-          <div class="modal-bg">
-            <div class="modal-card glass-dark">
-              <div class="modal-icon"><i class="fas fa-feather" style="font-size:21px;color:#a78bfa;"></i></div>
-              <h2 class="modal-h">你现在想去做什么？</h2>
-              <p class="modal-p">写下来，不是为了批评你，<br>只是让冲动慢一点。</p>
-              <textarea id="reason-input" rows="3" placeholder="例如：刷视频、回消息、躺一下、查资料……" style="padding:14px 16px;font-size:13px;margin-bottom:16px;"></textarea>
-              <button onclick="startCooldown()" class="btn-primary" style="width:100%;padding:14px;border-radius:14px;font-size:13px;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <i class="fas fa-hourglass-half" style="font-size:12px;"></i> 我写好了，先冷静 10 分钟
-              </button>
-              <button onclick="show('s-exit-1')" class="btn-ghost" style="width:100%;padding:12px;border-radius:14px;font-size:12px;display:flex;align-items:center;justify-content:center;gap:7px;">
-                <i class="fas fa-arrow-left" style="font-size:11px;"></i> 返回
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- ══════════════════════════════════════
-             SCREEN 5 · EXIT STEP 3 — 10-MIN COOLDOWN
-             ══════════════════════════════════════ -->
-        <div id="s-exit-3" class="screen" data-screen-label="冷静10分钟">
-          <div class="bg-layer"></div>
-          <canvas class="bg-canvas"></canvas>
-          <div class="bg-overlay"></div>
-          <div class="modal-bg">
-            <div class="modal-card glass-dark" style="text-align:center;">
-              <div class="ring-wrap" onclick="skipCooldown()" title="演示：轻点可快进">
-                <svg class="ring-svg" width="138" height="138" style="position:absolute;top:0;left:0;">
-                  <defs><linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
-                    <stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/>
-                  </linearGradient></defs>
-                  <circle cx="69" cy="69" r="60" stroke="rgba(255,255,255,.08)" stroke-width="5" fill="none"/>
-                  <circle id="cool-ring" cx="69" cy="69" r="60" stroke="url(#rg)" stroke-width="5" fill="none"
-                    stroke-dasharray="376.99" stroke-dashoffset="0" stroke-linecap="round" style="transition:stroke-dashoffset 1s linear;"/>
-                </svg>
-                <div class="ring-center">
-                  <div id="cool-clock" style="font-size:30px;font-weight:300;color:#f3f0ff;font-family:'Inter',monospace;letter-spacing:-.02em;">10:00</div>
-                  <div style="font-size:9px;color:var(--ink-ghost);margin-top:3px;letter-spacing:.05em;">轻点快进 · 演示</div>
+            <div id="s-exit-1" class="screen" data-screen-label="退出挽留·判断">
+              <div class="bg-layer"></div>
+              <canvas class="bg-canvas"></canvas>
+              <div class="bg-overlay"></div>
+              <div class="modal-bg">
+                <div class="modal-card glass-dark">
+                  <div class="modal-icon">
+                    <i
+                      class="fas fa-circle-question"
+                      style="font-size: 23px; color: #a78bfa"
+                    ></i>
+                  </div>
+                  <h2 class="modal-h">你想离开了吗？</h2>
+                  <p class="modal-p">这是紧急情况吗？</p>
+                  <div style="display: flex; flex-direction: column; gap: 10px">
+                    <button
+                      onclick="emergencyExit()"
+                      class="btn-danger-soft"
+                      style="
+                        padding: 14px;
+                        border-radius: 14px;
+                        font-size: 13px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                      "
+                    >
+                      <i class="fas fa-triangle-exclamation"></i>
+                      是，这是紧急情况 — 立即退出
+                    </button>
+                    <button
+                      onclick="show('s-exit-2')"
+                      class="btn-primary"
+                      style="
+                        padding: 14px;
+                        border-radius: 14px;
+                        font-size: 13px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                      "
+                    >
+                      <i class="fas fa-leaf" style="font-size: 12px"></i>
+                      不是，我只是想离开一下
+                    </button>
+                  </div>
+                  <p class="modal-foot">如果是紧急情况，我们不会留你。</p>
                 </div>
               </div>
-              <h2 class="modal-h" style="margin-bottom:12px;">先冷静 10 分钟</h2>
-              <p class="modal-p" style="margin-bottom:6px;">冲动会升起，也会下降。</p>
-              <p class="modal-p">你仍然有选择权。</p>
-              <div class="reason-echo" id="reason-echo" style="display:none;font-size:12px;color:var(--ink-faint);margin:-10px 0 18px;font-style:italic;"></div>
-              <div class="cool-msg-box glass">
-                <p id="cool-msg" style="font-size:12px;color:var(--ink-soft);line-height:1.75;margin:0;transition:opacity .4s ease;">
-                  你不需要完成所有事，<br>只是继续待着，就已经很好了。
-                </p>
-              </div>
-              <button onclick="backToFocus()" class="btn-ghost" style="width:100%;padding:13px;border-radius:14px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                <i class="fas fa-arrow-rotate-left" style="font-size:11px;"></i> 我现在就想回到任务
-              </button>
             </div>
-          </div>
-        </div>
 
-        <!-- ══════════════════════════════════════
+            <!-- ══════════════════════════════════════
+             SCREEN 4 · EXIT STEP 2 — WRITE REASON
+             ══════════════════════════════════════ -->
+            <div
+              id="s-exit-2"
+              class="screen"
+              data-screen-label="退出挽留·写下想法"
+            >
+              <div class="bg-layer"></div>
+              <canvas class="bg-canvas"></canvas>
+              <div class="bg-overlay"></div>
+              <div class="modal-bg">
+                <div class="modal-card glass-dark">
+                  <div class="modal-icon">
+                    <i
+                      class="fas fa-feather"
+                      style="font-size: 21px; color: #a78bfa"
+                    ></i>
+                  </div>
+                  <h2 class="modal-h">你现在想去做什么？</h2>
+                  <p class="modal-p">
+                    写下来，不是为了批评你，<br />只是让冲动慢一点。
+                  </p>
+                  <textarea
+                    id="reason-input"
+                    rows="3"
+                    placeholder="例如：刷视频、回消息、躺一下、查资料……"
+                    style="
+                      padding: 14px 16px;
+                      font-size: 13px;
+                      margin-bottom: 16px;
+                    "
+                  ></textarea>
+                  <button
+                    onclick="startCooldown()"
+                    class="btn-primary"
+                    style="
+                      width: 100%;
+                      padding: 14px;
+                      border-radius: 14px;
+                      font-size: 13px;
+                      margin-bottom: 10px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 8px;
+                    "
+                  >
+                    <i
+                      class="fas fa-hourglass-half"
+                      style="font-size: 12px"
+                    ></i>
+                    我写好了，先冷静 10 分钟
+                  </button>
+                  <button
+                    onclick="show('s-exit-1')"
+                    class="btn-ghost"
+                    style="
+                      width: 100%;
+                      padding: 12px;
+                      border-radius: 14px;
+                      font-size: 12px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 7px;
+                    "
+                  >
+                    <i class="fas fa-arrow-left" style="font-size: 11px"></i>
+                    返回
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ══════════════════════════════════════
+             SCREEN 5 · EXIT STEP 3 — 10-MIN COOLDOWN
+             ══════════════════════════════════════ -->
+            <div id="s-exit-3" class="screen" data-screen-label="冷静10分钟">
+              <div class="bg-layer"></div>
+              <canvas class="bg-canvas"></canvas>
+              <div class="bg-overlay"></div>
+              <div class="modal-bg">
+                <div class="modal-card glass-dark" style="text-align: center">
+                  <div
+                    class="ring-wrap"
+                    onclick="skipCooldown()"
+                    title="演示：轻点可快进"
+                  >
+                    <svg
+                      class="ring-svg"
+                      width="138"
+                      height="138"
+                      style="position: absolute; top: 0; left: 0"
+                    >
+                      <defs>
+                        <linearGradient id="rg" x1="0" y1="0" x2="1" y2="1">
+                          <stop offset="0%" stop-color="#7c3aed" />
+                          <stop offset="100%" stop-color="#a78bfa" />
+                        </linearGradient>
+                      </defs>
+                      <circle
+                        cx="69"
+                        cy="69"
+                        r="60"
+                        stroke="rgba(255,255,255,.08)"
+                        stroke-width="5"
+                        fill="none"
+                      />
+                      <circle
+                        id="cool-ring"
+                        cx="69"
+                        cy="69"
+                        r="60"
+                        stroke="url(#rg)"
+                        stroke-width="5"
+                        fill="none"
+                        stroke-dasharray="376.99"
+                        stroke-dashoffset="0"
+                        stroke-linecap="round"
+                        style="transition: stroke-dashoffset 1s linear"
+                      />
+                    </svg>
+                    <div class="ring-center">
+                      <div
+                        id="cool-clock"
+                        style="
+                          font-size: 30px;
+                          font-weight: 300;
+                          color: #f3f0ff;
+                          font-family: &quot;Inter&quot;, monospace;
+                          letter-spacing: -0.02em;
+                        "
+                      >
+                        10:00
+                      </div>
+                      <div
+                        style="
+                          font-size: 9px;
+                          color: var(--ink-ghost);
+                          margin-top: 3px;
+                          letter-spacing: 0.05em;
+                        "
+                      >
+                        轻点快进 · 演示
+                      </div>
+                    </div>
+                  </div>
+                  <h2 class="modal-h" style="margin-bottom: 12px">
+                    先冷静 10 分钟
+                  </h2>
+                  <p class="modal-p" style="margin-bottom: 6px">
+                    冲动会升起，也会下降。
+                  </p>
+                  <p class="modal-p">你仍然有选择权。</p>
+                  <div
+                    class="reason-echo"
+                    id="reason-echo"
+                    style="
+                      display: none;
+                      font-size: 12px;
+                      color: var(--ink-faint);
+                      margin: -10px 0 18px;
+                      font-style: italic;
+                    "
+                  ></div>
+                  <div class="cool-msg-box glass">
+                    <p
+                      id="cool-msg"
+                      style="
+                        font-size: 12px;
+                        color: var(--ink-soft);
+                        line-height: 1.75;
+                        margin: 0;
+                        transition: opacity 0.4s ease;
+                      "
+                    >
+                      你不需要完成所有事，<br />只是继续待着，就已经很好了。
+                    </p>
+                  </div>
+                  <button
+                    onclick="backToFocus()"
+                    class="btn-ghost"
+                    style="
+                      width: 100%;
+                      padding: 13px;
+                      border-radius: 14px;
+                      font-size: 13px;
+                      display: flex;
+                      align-items: center;
+                      justify-content: center;
+                      gap: 8px;
+                    "
+                  >
+                    <i
+                      class="fas fa-arrow-rotate-left"
+                      style="font-size: 11px"
+                    ></i>
+                    我现在就想回到任务
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- ══════════════════════════════════════
              SCREEN 6 · COOLDOWN ENDED — CHOICE
              ══════════════════════════════════════ -->
-        <div id="s-exit-4" class="screen" data-screen-label="冷静结束·做选择">
-          <div class="bg-layer"></div>
-          <canvas class="bg-canvas"></canvas>
-          <div class="bg-overlay"></div>
-          <div class="modal-bg">
-            <div class="modal-card glass-dark" style="text-align:center;">
-              <div class="modal-icon ok"><i class="fas fa-check" style="font-size:21px;color:#34d399;"></i></div>
-              <h2 class="modal-h">10 分钟已经结束</h2>
-              <p class="modal-p" style="margin-bottom:6px;">现在你想怎么选择？</p>
-              <p style="font-size:11px;color:var(--ink-ghost);margin:0 0 26px;">无论你选择什么，都请温柔对待自己。</p>
-              <div style="display:flex;flex-direction:column;gap:10px;">
-                <button onclick="backToFocus()" class="btn-primary" style="padding:16px;border-radius:16px;font-size:14px;font-weight:600;display:flex;align-items:center;justify-content:center;gap:10px;">
-                  <i class="fas fa-arrow-rotate-left" style="font-size:13px;"></i> 回到任务
-                </button>
-                <button onclick="resetToCreate()" class="btn-ghost" style="padding:14px;border-radius:16px;font-size:13px;display:flex;align-items:center;justify-content:center;gap:8px;">
-                  确认离开，下次再来
-                </button>
+            <div
+              id="s-exit-4"
+              class="screen"
+              data-screen-label="冷静结束·做选择"
+            >
+              <div class="bg-layer"></div>
+              <canvas class="bg-canvas"></canvas>
+              <div class="bg-overlay"></div>
+              <div class="modal-bg">
+                <div class="modal-card glass-dark" style="text-align: center">
+                  <div class="modal-icon ok">
+                    <i
+                      class="fas fa-check"
+                      style="font-size: 21px; color: #34d399"
+                    ></i>
+                  </div>
+                  <h2 class="modal-h">10 分钟已经结束</h2>
+                  <p class="modal-p" style="margin-bottom: 6px">
+                    现在你想怎么选择？
+                  </p>
+                  <p
+                    style="
+                      font-size: 11px;
+                      color: var(--ink-ghost);
+                      margin: 0 0 26px;
+                    "
+                  >
+                    无论你选择什么，都请温柔对待自己。
+                  </p>
+                  <div style="display: flex; flex-direction: column; gap: 10px">
+                    <button
+                      onclick="backToFocus()"
+                      class="btn-primary"
+                      style="
+                        padding: 16px;
+                        border-radius: 16px;
+                        font-size: 14px;
+                        font-weight: 600;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 10px;
+                      "
+                    >
+                      <i
+                        class="fas fa-arrow-rotate-left"
+                        style="font-size: 13px"
+                      ></i>
+                      回到任务
+                    </button>
+                    <button
+                      onclick="resetToCreate()"
+                      class="btn-ghost"
+                      style="
+                        padding: 14px;
+                        border-radius: 16px;
+                        font-size: 13px;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        gap: 8px;
+                      "
+                    >
+                      确认离开，下次再来
+                    </button>
+                  </div>
+                  <p class="modal-foot">今天能坚持到这里，已经很了不起了。</p>
+                </div>
               </div>
-              <p class="modal-foot">今天能坚持到这里，已经很了不起了。</p>
             </div>
-          </div>
-        </div>
 
-        <!-- ══════════════════════════════════════
+            <!-- ══════════════════════════════════════
              EMERGENCY EXIT — blessing
              ══════════════════════════════════════ -->
-        <div id="s-emergency" class="screen" data-screen-label="紧急退出">
-          <div style="position:absolute;inset:0;background:
-            radial-gradient(ellipse 70% 60% at 50% 35%, rgba(49,46,129,.3) 0%, transparent 65%), var(--bg-deep);"></div>
-          <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:40px;z-index:1;">
-            <div style="font-size:40px;margin-bottom:22px;" class="anim-float">🌙</div>
-            <h2 style="font-size:22px;font-weight:600;color:var(--ink);margin:0 0 14px;">去处理吧</h2>
-            <p style="font-size:14px;color:var(--ink-soft);line-height:1.8;margin:0 0 36px;">
-              无论发生什么，都照顾好自己。<br>专注空间随时都在，等你回来。
-            </p>
-            <button onclick="resetToCreate()" class="btn-primary" style="padding:14px 38px;border-radius:15px;font-size:14px;">回到主页</button>
+            <div id="s-emergency" class="screen" data-screen-label="紧急退出">
+              <div
+                style="
+                  position: absolute;
+                  inset: 0;
+                  background:
+                    radial-gradient(
+                      ellipse 70% 60% at 50% 35%,
+                      rgba(49, 46, 129, 0.3) 0%,
+                      transparent 65%
+                    ),
+                    var(--bg-deep);
+                "
+              ></div>
+              <div
+                style="
+                  position: absolute;
+                  inset: 0;
+                  display: flex;
+                  flex-direction: column;
+                  align-items: center;
+                  justify-content: center;
+                  text-align: center;
+                  padding: 40px;
+                  z-index: 1;
+                "
+              >
+                <div
+                  style="font-size: 40px; margin-bottom: 22px"
+                  class="anim-float"
+                >
+                  🌙
+                </div>
+                <h2
+                  style="
+                    font-size: 22px;
+                    font-weight: 600;
+                    color: var(--ink);
+                    margin: 0 0 14px;
+                  "
+                >
+                  去处理吧
+                </h2>
+                <p
+                  style="
+                    font-size: 14px;
+                    color: var(--ink-soft);
+                    line-height: 1.8;
+                    margin: 0 0 36px;
+                  "
+                >
+                  无论发生什么，都照顾好自己。<br />专注空间随时都在，等你回来。
+                </p>
+                <button
+                  onclick="resetToCreate()"
+                  class="btn-primary"
+                  style="
+                    padding: 14px 38px;
+                    border-radius: 15px;
+                    font-size: 14px;
+                  "
+                >
+                  回到主页
+                </button>
+              </div>
+            </div>
           </div>
+          <!-- /device-screen -->
         </div>
+        <!-- /device -->
+      </div>
+      <!-- /device-scaler -->
+    </div>
+    <!-- /stage -->
 
-      </div><!-- /device-screen -->
-    </div><!-- /device -->
-  </div><!-- /device-scaler -->
-</div><!-- /stage -->
+    <!-- Orientation control -->
+    <div id="rotate-fab" onclick="toggleOrientation()">
+      <i class="fas fa-rotate"></i>
+      <span id="rotate-label">横屏</span>
+      <span style="color: var(--ink-ghost); font-size: 11px">按 R</span>
+    </div>
+    <div id="orient-toast"></div>
 
-<!-- Orientation control -->
-<div id="rotate-fab" onclick="toggleOrientation()">
-  <i class="fas fa-rotate"></i>
-  <span id="rotate-label">横屏</span>
-  <span style="color:var(--ink-ghost);font-size:11px;">按 R</span>
-</div>
-<div id="orient-toast"></div>
-
-<script src="wanliu/app.js"></script>
-</body>
+    <script src="wanliu/app.js"></script>
+  </body>
 </html>
