@@ -125,6 +125,10 @@ fun WanliuNavGraph(
             ExitStep1Screen(
                 themeId = state.config.backgroundTheme,
                 ghostTimeText = state.formattedTime,
+                onContinueWorking = {
+                    viewModel.returnToFocus()
+                    navController.popBackStack(NavRoutes.FOCUS, inclusive = false)
+                },
                 onEmergencyExit = {
                     viewModel.emergencyExit()
                     navController.navigate(NavRoutes.EMERGENCY)

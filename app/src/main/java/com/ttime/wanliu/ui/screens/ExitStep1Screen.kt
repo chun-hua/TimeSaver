@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.QuestionMark
 import androidx.compose.material.icons.filled.Spa
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material.icons.outlined.AutoAwesome
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -16,6 +17,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
@@ -31,6 +33,7 @@ import com.ttime.wanliu.ui.theme.*
 fun ExitStep1Screen(
     themeId: String,
     ghostTimeText: String,
+    onContinueWorking: () -> Unit,
     onEmergencyExit: () -> Unit,
     onNotEmergency: () -> Unit
 ) {
@@ -64,7 +67,7 @@ fun ExitStep1Screen(
         Spacer(modifier = Modifier.height(8.dp))
 
         Text(
-            text = "这是紧急情况吗？",
+            text = "冲动会来，也会走。再给自己一次机会。",
             style = DialogBodyStyle,
             color = InkFaint,
             textAlign = TextAlign.Center,
@@ -72,15 +75,19 @@ fun ExitStep1Screen(
 
         Spacer(modifier = Modifier.height(28.dp))
 
-        // Emergency button
+        // 继续专注工作 — 主推荐操作（翠绿色，最大）
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(14.dp))
-                .background(DangerBg)
-                .border(1.dp, DangerSoft.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
-                .clickableWithoutRipple(onClick = onEmergencyExit)
-                .padding(14.dp),
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    Brush.horizontalGradient(
+                        listOf(Emerald.copy(alpha = 0.18f), Color(0xFF10B981).copy(alpha = 0.10f))
+                    )
+                )
+                .border(1.dp, Emerald.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                .clickableWithoutRipple(onClick = onContinueWorking)
+                .padding(16.dp),
             contentAlignment = Alignment.Center
         ) {
             Row(
@@ -88,29 +95,29 @@ fun ExitStep1Screen(
                 horizontalArrangement = Arrangement.Center
             ) {
                 Icon(
-                    imageVector = Icons.Filled.Warning,
+                    imageVector = Icons.Outlined.AutoAwesome,
                     contentDescription = null,
-                    tint = DangerSoft.copy(alpha = 0.85f),
-                    modifier = Modifier.size(16.dp)
+                    tint = Color(0xFFA7F3D0),
+                    modifier = Modifier.size(18.dp)
                 )
-                Spacer(modifier = Modifier.width(8.dp))
+                Spacer(modifier = Modifier.width(10.dp))
                 Text(
-                    text = "是，这是紧急情况 — 立即退出",
-                    color = DangerSoft.copy(alpha = 0.85f),
-                    style = ButtonTextStyle.copy(fontSize = 13.sp, lineHeight = 18.sp)
+                    text = "继续专注工作",
+                    color = Color(0xFFA7F3D0),
+                    style = ButtonTextStyle.copy(fontSize = 14.sp, lineHeight = 19.sp)
                 )
             }
         }
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Not emergency button
+        // 我只是想离开一下
         Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .clip(RoundedCornerShape(14.dp))
                 .background(
-                    brush = androidx.compose.ui.graphics.Brush.horizontalGradient(
+                    brush = Brush.horizontalGradient(
                         listOf(PurplePrimary, IndigoDeep)
                     )
                 )
@@ -130,9 +137,41 @@ fun ExitStep1Screen(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "不是，我只是想离开一下",
+                    text = "我只是想离开一下",
                     color = Color.White,
                     style = ButtonTextStyle.copy(fontSize = 13.sp, lineHeight = 18.sp)
+                )
+            }
+        }
+
+        Spacer(modifier = Modifier.height(10.dp))
+
+        // 紧急情况 — 立即退出（最小）
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(14.dp))
+                .background(DangerBg)
+                .border(1.dp, DangerSoft.copy(alpha = 0.2f), RoundedCornerShape(14.dp))
+                .clickableWithoutRipple(onClick = onEmergencyExit)
+                .padding(12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Icon(
+                    imageVector = Icons.Filled.Warning,
+                    contentDescription = null,
+                    tint = DangerSoft.copy(alpha = 0.85f),
+                    modifier = Modifier.size(14.dp)
+                )
+                Spacer(modifier = Modifier.width(7.dp))
+                Text(
+                    text = "紧急情况 — 立即退出",
+                    color = DangerSoft.copy(alpha = 0.85f),
+                    style = ButtonTextStyle.copy(fontSize = 12.sp, lineHeight = 17.sp)
                 )
             }
         }

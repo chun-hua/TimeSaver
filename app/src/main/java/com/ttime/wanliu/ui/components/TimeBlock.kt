@@ -5,6 +5,9 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.AutoAwesome
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -17,6 +20,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ttime.wanliu.ui.theme.*
@@ -30,15 +34,16 @@ fun TimeBlock(
     style: String = "glass",
     modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "float")
-    val floatOffset by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = -8f,
+    // Breathing card animation — box shadow glow pulses
+    val infiniteTransition = rememberInfiniteTransition(label = "breatheCard")
+    val glowAlpha by infiniteTransition.animateFloat(
+        initialValue = 0.12f,
+        targetValue = 0.28f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3500, easing = EaseInOutCubic),
+            animation = tween(2500, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
-        label = "floatY"
+        label = "glowAlpha"
     )
 
     val breatheAlpha by infiniteTransition.animateFloat(
@@ -51,32 +56,33 @@ fun TimeBlock(
         label = "breathe"
     )
 
-    val blockModifier = when (style) {
-        "glass" -> Modifier
-            .shadow(20.dp, RoundedCornerShape(28.dp), ambientColor = PurplePrimary.copy(alpha = 0.15f))
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color(0x9E080814))
-            .border(1.dp, Color.White.copy(alpha = 0.09f), RoundedCornerShape(28.dp))
+    val isNoteStyle = style == "note"
+    val isMinimal = style == "minimal"
 
-        "minimal" -> Modifier
-            .shadow(4.dp, RoundedCornerShape(24.dp))
+    // Glass style — frosted glass with breathing glow
+    val blockModifier = when {
+        isMinimal -> Modifier
             .clip(RoundedCornerShape(24.dp))
-            .background(Color(0x99000000))
-            .border(0.5.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(24.dp))
+            .background(Color.Transparent)
+            .border(0.dp, Color.Transparent, RoundedCornerShape(24.dp))
 
-        "note" -> Modifier
-            .shadow(8.dp, RoundedCornerShape(12.dp))
-            .clip(RoundedCornerShape(12.dp))
+        isNoteStyle -> Modifier
+            .clip(RoundedCornerShape(16.dp))
             .background(Brush.verticalGradient(listOf(Color(0xFFFEF3C7), Color(0xFFFDE68A))))
-            .border(0.5.dp, Color(0xFFD4A853), RoundedCornerShape(12.dp))
+            .border(0.5.dp, Color(0xFFD4A853), RoundedCornerShape(16.dp))
 
         else -> Modifier
+            .shadow(
+                elevation = 16.dp,
+                shape = RoundedCornerShape(28.dp),
+                ambientColor = PurplePrimary.copy(alpha = glowAlpha),
+                spotColor = PurplePrimary.copy(alpha = glowAlpha * 0.7f)
+            )
             .clip(RoundedCornerShape(28.dp))
             .background(Color(0x9E080814))
             .border(1.dp, Color.White.copy(alpha = 0.09f), RoundedCornerShape(28.dp))
     }
 
-    val isNoteStyle = style == "note"
     val textColor = if (isNoteStyle) Color(0xFF1A1A2E) else InkWhite
     val faintColor = if (isNoteStyle) Color(0xFF5C5340) else InkFaint
     val softColor = if (isNoteStyle) Color(0xFF3A3328) else InkSoft
@@ -87,34 +93,98 @@ fun TimeBlock(
     else
         Brush.horizontalGradient(listOf(PurplePrimary, PurpleLight))
 
+    val iconBg = if (isNoteStyle) Color(0xFFD4C388).copy(alpha = 0.2f) else PurplePrimary.copy(alpha = 0.2f)
+    val iconTint = if (isNoteStyle) Color(0xFF8B6914) else PurpleLight
+
     Box(
-        modifier = modifier
-            .offset(y = floatOffset.dp)
-            .then(blockModifier),
+        modifier = modifier.then(blockModifier),
         contentAlignment = Alignment.Center
     ) {
         Column(
-            modifier = Modifier.padding(horizontal = 52.dp, vertical = 44.dp),
+            modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = "当前任务",
-                style = SectionLabelStyle.copy(fontSize = 10.sp, lineHeight = 14.sp),
-                color = faintColor
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                text = taskName,
-                style = MaterialTheme.typography.titleMedium,
-                color = textColor
-            )
-            Spacer(modifier = Modifier.height(28.dp))
+            // ═══ Top accent glow line ═══
+            if (!isMinimal && !isNoteStyle) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth(0.55f)
+                        .height(1.dp)
+                        .background(
+                            Brush.horizontalGradient(
+                                listOf(
+                                    Color.Transparent,
+                                    PurpleLight.copy(alpha = 0.45f),
+                                    Color.Transparent
+                                )
+                            )
+                        )
+                )
+                Spacer(modifier = Modifier.height(14.dp))
+            }
+
+            // ═══ Task row: icon + task name ═══
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.Center
+            ) {
+                if (!isMinimal) {
+                    Box(
+                        modifier = Modifier
+                            .size(34.dp)
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(iconBg),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Outlined.AutoAwesome,
+                            contentDescription = null,
+                            tint = iconTint,
+                            modifier = Modifier.size(15.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(12.dp))
+                }
+
+                Column(
+                    modifier = Modifier.weight(1f, fill = false),
+                    horizontalAlignment = if (isMinimal) Alignment.CenterHorizontally else Alignment.Start
+                ) {
+                    Text(
+                        text = "当前专注",
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 9.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            letterSpacing = 0.8.sp
+                        ),
+                        color = faintColor
+                    )
+                    Text(
+                        text = taskName,
+                        style = MaterialTheme.typography.titleMedium.copy(
+                            fontSize = 15.sp,
+                            fontWeight = FontWeight.Medium
+                        ),
+                        color = textColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(22.dp))
+
+            // ═══ Clock ═══
             Text(
                 text = timeText,
                 color = textColor,
                 style = ClockTextStyle
             )
-            Spacer(modifier = Modifier.height(28.dp))
+
+            Spacer(modifier = Modifier.height(26.dp))
+
+            // ═══ Progress ═══
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween
@@ -126,23 +196,25 @@ fun TimeBlock(
                     color = faintColor
                 )
             }
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(9.dp))
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(3.dp)
-                    .clip(RoundedCornerShape(2.dp))
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(3.dp))
                     .background(progressTrack)
             ) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth(progressPercent / 100f)
                         .fillMaxHeight()
-                        .clip(RoundedCornerShape(2.dp))
+                        .clip(RoundedCornerShape(3.dp))
                         .background(progressFill)
                 )
             }
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(22.dp))
+
+            // ═══ Gentle message ═══
             Text(
                 text = gentleMessage,
                 style = MaterialTheme.typography.bodyMedium,
