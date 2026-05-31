@@ -26,4 +26,9 @@ class MainActivity : ComponentActivity() {
             }
         }
     }
+
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        AppLeaveEvents.notifyUserLeave()
+    }
 }

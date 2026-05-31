@@ -1,13 +1,19 @@
 package com.ttime.wanliu.ui.navigation
 
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.ttime.wanliu.AppLeaveEvents
 import com.ttime.wanliu.ui.screens.*
 import com.ttime.wanliu.ui.viewmodel.ExitStep
 import com.ttime.wanliu.ui.viewmodel.FocusViewModel
@@ -28,6 +34,70 @@ fun WanliuNavGraph(
 ) {
     val navController = rememberNavController()
     val state by viewModel.state.collectAsState()
+    val latestState by rememberUpdatedState(state)
+    val lifecycleOwner = LocalLifecycleOwner.current
+
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            val currentState = latestState
+            if (
+                event == Lifecycle.Event.ON_STOP &&
+                currentState.isFocusActive &&
+                currentState.exitStep == ExitStep.NONE
+            ) {
+                viewModel.showExitCheck()
+            }
+        }
+
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose {
+            lifecycleOwner.lifecycle.removeObserver(observer)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        AppLeaveEvents.events.collect {
+            val currentState = latestState
+            if (currentState.isFocusActive && currentState.exitStep == ExitStep.NONE) {
+                viewModel.showExitCheck()
+            }
+        }
+    }
+
+    fun navigateSingleTop(route: String) {
+        if (navController.currentDestination?.route != route) {
+            navController.navigate(route) {
+                launchSingleTop = true
+            }
+        }
+    }
+
+    LaunchedEffect(state.exitStep, state.isFocusActive) {
+        when (state.exitStep) {
+            ExitStep.EMERGENCY_CHECK -> navigateSingleTop(NavRoutes.EXIT_STEP_1)
+            ExitStep.WRITE_REASON -> navigateSingleTop(NavRoutes.EXIT_STEP_2)
+            ExitStep.COOL_DOWN -> navigateSingleTop(NavRoutes.EXIT_STEP_3)
+            ExitStep.COOL_DOWN_ENDED -> navigateSingleTop(NavRoutes.EXIT_STEP_4)
+            ExitStep.EMERGENCY_EXIT -> navigateSingleTop(NavRoutes.EMERGENCY)
+            ExitStep.NONE -> {
+                if (!state.isFocusActive) {
+                    if (navController.currentDestination?.route != NavRoutes.CREATE) {
+                        navController.navigate(NavRoutes.CREATE) {
+                            popUpTo(0) { inclusive = true }
+                            launchSingleTop = true
+                        }
+                    }
+                } else if (
+                    navController.currentDestination?.route == NavRoutes.EXIT_STEP_1 ||
+                    navController.currentDestination?.route == NavRoutes.EXIT_STEP_2 ||
+                    navController.currentDestination?.route == NavRoutes.EXIT_STEP_3 ||
+                    navController.currentDestination?.route == NavRoutes.EXIT_STEP_4
+                ) {
+                    navController.popBackStack(NavRoutes.FOCUS, inclusive = false)
+                }
+            }
+        }
+    }
 
     NavHost(
         navController = navController,
@@ -45,31 +115,6 @@ fun WanliuNavGraph(
         }
 
         composable(NavRoutes.FOCUS) {
-            LaunchedEffect(state.exitStep) {
-                when (state.exitStep) {
-                    ExitStep.EMERGENCY_CHECK -> navController.navigate(NavRoutes.EXIT_STEP_1)
-                    ExitStep.EMERGENCY_EXIT -> navController.navigate(NavRoutes.EMERGENCY)
-                    ExitStep.NONE -> {
-                        if (navController.currentDestination?.route == NavRoutes.EXIT_STEP_1 ||
-                            navController.currentDestination?.route == NavRoutes.EXIT_STEP_2 ||
-                            navController.currentDestination?.route == NavRoutes.EXIT_STEP_3 ||
-                            navController.currentDestination?.route == NavRoutes.EXIT_STEP_4
-                        ) {
-                            navController.popBackStack(NavRoutes.FOCUS, inclusive = false)
-                        }
-                    }
-                    else -> {}
-                }
-            }
-
-            LaunchedEffect(state.isFocusActive) {
-                if (!state.isFocusActive && state.exitStep == ExitStep.NONE) {
-                    navController.navigate(NavRoutes.CREATE) {
-                        popUpTo(0) { inclusive = true }
-                    }
-                }
-            }
-
             FocusScreen(
                 viewModel = viewModel,
                 onExitClick = { viewModel.showExitCheck() }
@@ -106,15 +151,6 @@ fun WanliuNavGraph(
         }
 
         composable(NavRoutes.EXIT_STEP_3) {
-            LaunchedEffect(state.exitStep) {
-                if (state.exitStep == ExitStep.COOL_DOWN_ENDED) {
-                    navController.navigate(NavRoutes.EXIT_STEP_4)
-                }
-                if (state.exitStep == ExitStep.NONE) {
-                    navController.popBackStack(NavRoutes.FOCUS, inclusive = false)
-                }
-            }
-
             ExitStep3Screen(
                 themeId = state.config.backgroundTheme,
                 ghostTimeText = state.formattedTime,

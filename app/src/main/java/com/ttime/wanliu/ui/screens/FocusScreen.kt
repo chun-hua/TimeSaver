@@ -20,9 +20,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.Lifecycle
-import androidx.lifecycle.LifecycleEventObserver
-import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.ttime.wanliu.ui.components.FocusBackground
 import com.ttime.wanliu.ui.components.TimeBlock
 import com.ttime.wanliu.ui.components.clickableWithoutRipple
@@ -40,24 +37,6 @@ fun FocusScreen(
 
     BackHandler(enabled = state.isFocusActive && state.exitStep == ExitStep.NONE) {
         viewModel.showExitCheck()
-    }
-
-    val lifecycleOwner = LocalLifecycleOwner.current
-    DisposableEffect(lifecycleOwner, state.isFocusActive, state.exitStep) {
-        val observer = LifecycleEventObserver { _, event ->
-            if (
-                event == Lifecycle.Event.ON_PAUSE &&
-                state.isFocusActive &&
-                state.exitStep == ExitStep.NONE
-            ) {
-                viewModel.showExitCheck()
-            }
-        }
-
-        lifecycleOwner.lifecycle.addObserver(observer)
-        onDispose {
-            lifecycleOwner.lifecycle.removeObserver(observer)
-        }
     }
 
     val themeColor = when (config.backgroundTheme) {
