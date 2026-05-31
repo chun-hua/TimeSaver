@@ -128,8 +128,8 @@ fun FocusScreen(
             ) {
                 Box(
                     modifier = Modifier
-                        .fillMaxWidth(0.82f)
-                        .height(200.dp),
+                        .fillMaxWidth(0.84f)
+                        .fillMaxHeight(0.38f),
                     contentAlignment = Alignment.Center
                 ) {
                     CompanionStage(
@@ -137,7 +137,7 @@ fun FocusScreen(
                         modifier = Modifier.fillMaxSize()
                     )
                 }
-                Spacer(modifier = Modifier.height(8.dp))
+                Spacer(modifier = Modifier.height(4.dp))
                 TimeBlock(
                     taskName = config.taskName.ifBlank { "专注任务" },
                     timeText = state.formattedTime,
