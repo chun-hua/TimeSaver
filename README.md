@@ -40,9 +40,11 @@
   - 专注进度条 + 百分比
   - 温和提示语（呼吸式淡入淡出动画）
 - 卡片整体带有呼吸感盒阴影辉光动画，5 秒周期缓慢脉动。
-- 左上角提供克制的退出按钮。
+- 左上角提供克制的退出按钮与「锁屏」按钮（详见下文「一键锁屏」）。
 - 顶部显示「专注中」状态点，底部显示当前背景氛围说明。
 - 专注期间计时持续运行，除非用户确认退出或任务完成。
+- 专注页全程保持屏幕常亮（`FLAG_KEEP_SCREEN_ON`），避免长时间不触屏被系统息屏；离开专注页时自动移除该标记。
+- 横竖屏自适应：跟随设备重力旋转，布局与配色比例对齐设计原型（详见下文「横屏适配」）。
 
 ### 3. 离开保护
 
@@ -90,6 +92,24 @@
 
 如果用户确认是紧急情况，应用会立即退出专注流程，并显示祝福式结束页，避免惩罚性体验。
 
+### 6. 一键锁屏
+
+专注页提供「锁屏」按钮，点击后立即熄屏锁机，把专注页变成锁屏前的最后一道关口。
+
+- **立即锁屏**：通过 `DevicePolicyManager.lockNow()` 实现，首次点击会引导用户授予「设备管理员」权限（仅申请 `force-lock` 策略，不涉及抹除/改密等敏感能力）。
+- **盖在锁屏之上**：`MainActivity` 设置 `showWhenLocked` + `turnScreenOn`，锁屏后再次亮屏时，专注页会停留在系统锁屏之上，需先点「退出」走完挽留流程才能进入手机。
+- **不误触挽留**：点击锁屏会让 App 短暂进入后台并触发离开回调；为避免误判为「想退出专注」，`AppLeaveEvents` 在锁屏动作前后开启一个短时间窗，抑制这一次的离开挽留。
+
+> 说明：这是「专注页盖在系统锁屏之上」的方案，而非替换系统锁屏。部分国产 ROM（MIUI/HyperOS、ColorOS、EMUI 等）需在系统中额外授予本应用「锁屏显示 / 后台弹窗」权限，遮盖效果才会生效。
+
+### 7. 横屏适配
+
+专注页跟随设备重力自动横竖旋转，布局比例对齐设计原型 `design/挽留者 原型.html`：
+
+- **有陪伴者时**：竖屏为上下布局（陪伴者粒子在上、时间块在下）；横屏切换为左右分置（陪伴者一侧、时间块一侧，间距 18dp），对应原型 `.device.landscape .focus-center.has-companion { flex-direction: row; }`。
+- **无陪伴者时**：横竖屏均居中显示时间块。
+- 横屏下时钟字号、卡片最大宽度、顶栏内边距等按原型自适应收缩（如时钟 70sp→60sp、卡片 334dp→420dp）。
+
 ---
 
 ## 技术架构
@@ -111,8 +131,11 @@
 
 ```text
 app/src/main/java/com/ttime/wanliu/
-|-- MainActivity.kt              # 入口 Activity，捕捉 onUserLeaveHint
-|-- AppLeaveEvents.kt            # 用户离开 App 的事件通道
+|-- MainActivity.kt              # 入口 Activity；捕捉 onUserLeaveHint，提供一键锁屏入口，
+|                                #   设置 showWhenLocked/turnScreenOn 让专注页盖在锁屏之上
+|-- AppLeaveEvents.kt            # 用户离开 App 的事件通道 + 主动锁屏抑制窗
+|-- LockController.kt            # 一键锁屏控制器：lockNow() / 拉起设备管理员授权
+|-- LockAdminReceiver.kt         # 设备管理员接收器（仅 force-lock 策略）
 |-- data/
 |   |-- Session.kt               # Room Entity
 |   |-- SessionDao.kt            # Room DAO
@@ -120,14 +143,17 @@ app/src/main/java/com/ttime/wanliu/
 |-- ui/
 |   |-- theme/                   # Color / Type / Theme
 |   |-- navigation/
-|   |   `-- WanliuNavGraph.kt    # 全局导航与离开事件处理
+|   |   `-- WanliuNavGraph.kt    # 全局导航与离开事件处理（锁屏抑制窗内跳过挽留）
 |   |-- screens/
 |   |   |-- CreateScreen.kt      # 创建专注空间
-|   |   |-- FocusScreen.kt       # 全屏专注空间
+|   |   |-- FocusScreen.kt       # 全屏专注空间（横竖屏自适应 + 屏幕常亮 + 锁屏按钮）
 |   |   |-- ExitStep1~4Screen.kt # 四步退出挽留流程
 |   |   `-- EmergencyScreen.kt   # 紧急退出页
 |   |-- components/
-|   |   |-- TimeBlock.kt         # 时间块卡片（毛玻璃质感+呼吸动画）
+|   |   |-- CompanionStage.kt    # 陪伴者粒子引擎（形态点云采样 + morph + 大尺寸专注页画布）
+|   |   |-- CompanionPicker.kt   # 创建页陪伴者选择行
+|   |   |-- CompanionData.kt     # 陪伴者元数据（名字 / 金句 / 色调）
+|   |   |-- TimeBlock.kt         # 时间块卡片（毛玻璃质感+呼吸动画，横屏自适应）
 |   |   |-- ProgressRing.kt      # 圆环进度
 |   |   |-- ThemeCard.kt         # 主题卡片
 |   |   |-- StyleCard.kt         # 样式卡片
@@ -137,6 +163,7 @@ app/src/main/java/com/ttime/wanliu/
 |   |   `-- Modifiers.kt         # 通用 Modifier
 |   `-- viewmodel/
 |       `-- FocusViewModel.kt    # 核心状态与计时逻辑
+`-- res/xml/device_admin.xml     # 设备管理员策略声明（force-lock）
 ```
 
 ---
@@ -187,6 +214,29 @@ adb install -r app/build/outputs/apk/debug/app-debug.apk
 ---
 
 ## 版本记录
+
+### v0603 — 2026-06-01
+
+**陪伴者粒子引擎对齐设计原型**
+
+- 重写 `CompanionStage` 粒子引擎：完整移植原型的几何原语点云系统（散点 / 线段 / 椭圆 / 环 / 弧），每颗粒子带独立颜色与透明度，专注页粒子数提升至 560，渲染（三层辉光、呼吸脉动、逐粒漂移）与原型一致。
+- 创建页陪伴者卡片预览改用同一套引擎（150 粒，展示该大师标志形态的雏形），替换旧的 12 轨道粒子旋转。
+- 字体比例对齐原型 `.companion-cap`：名字固定青色 + 「正在陪你专注」偏白说明同行双色，金句 10sp italic、阶段圆点 5/6dp。
+
+**横屏适配**
+
+- 专注页跟随设备重力旋转（`screenOrientation=fullSensor`）。
+- 有陪伴者时横屏左右分置（对应原型 `flex-direction: row`），竖屏上下布局；时钟字号、卡片宽度、顶栏内边距按原型自适应。
+
+**一键锁屏**
+
+- 新增「锁屏」按钮，通过设备管理员 `lockNow()` 立即锁机；`showWhenLocked` + `turnScreenOn` 让专注页盖在系统锁屏之上，须先退出才进入手机。
+- 新增 `LockController` / `LockAdminReceiver` / `res/xml/device_admin.xml`，并在 `AppLeaveEvents` 加入锁屏抑制窗，避免主动锁屏被误判为离开而弹挽留。
+
+**修复**
+
+- 专注页保持屏幕常亮（`FLAG_KEEP_SCREEN_ON`），修复「运行一会儿后自动黑屏」。
+- 修复粒子 morph 切换时「向前跳一帧再修正」：将「形态索引 + 插值系数」合并为单一连续时钟驱动，同帧推导，消除状态与动画分离的竞态。
 
 ### v0601 — 2025-06-01
 
