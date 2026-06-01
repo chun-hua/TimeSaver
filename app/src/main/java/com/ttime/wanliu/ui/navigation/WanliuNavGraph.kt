@@ -43,7 +43,9 @@ fun WanliuNavGraph(
             if (
                 event == Lifecycle.Event.ON_STOP &&
                 currentState.isFocusActive &&
-                currentState.exitStep == ExitStep.NONE
+                currentState.exitStep == ExitStep.NONE &&
+                // 主动锁屏导致的离开不弹挽留
+                !AppLeaveEvents.consumeSuppressLeave()
             ) {
                 viewModel.showExitCheck()
             }

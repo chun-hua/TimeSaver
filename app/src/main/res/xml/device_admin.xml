@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<device-admin xmlns:android="http://schemas.android.com/apk/res/android">
+    <uses-policies>
+        <!-- 仅申请「立即锁屏」能力，不申请抹除/密码等敏感策略 -->
+        <force-lock />
+    </uses-policies>
+</device-admin>

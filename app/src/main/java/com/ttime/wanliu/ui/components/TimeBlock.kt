@@ -33,6 +33,7 @@ fun TimeBlock(
     progressPercent: Float,
     gentleMessage: String,
     style: String = "glass",
+    landscape: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val infiniteTransition = rememberInfiniteTransition(label = "breatheCard")
@@ -133,7 +134,7 @@ fun TimeBlock(
 
     Box(
         modifier = modifier
-            .widthIn(max = 334.dp)
+            .widthIn(max = if (landscape) 420.dp else 334.dp)
             .fillMaxWidth()
             .scale(cardScale)
             .then(blockModifier),
@@ -214,11 +215,11 @@ fun TimeBlock(
 
             Spacer(modifier = Modifier.height(22.dp))
 
-            // ═══ Clock ═══
+            // ═══ Clock ═══（横屏字号略小，对应原型 74px→64px）
             Text(
                 text = timeText,
                 color = textColor,
-                style = ClockTextStyle
+                style = if (landscape) ClockTextStyle.copy(fontSize = 60.sp, lineHeight = 66.sp) else ClockTextStyle
             )
 
             Spacer(modifier = Modifier.height(26.dp))

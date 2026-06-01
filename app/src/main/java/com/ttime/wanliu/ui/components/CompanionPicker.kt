@@ -17,7 +17,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -125,22 +124,15 @@ private fun CompanionPickerCard(
 }
 
 /**
- * 卡片上的粒子预览圆 — 用 Canvas 画几圈光点。
+ * 卡片上的粒子预览圆 — 复用形态点云引擎（CompanionOrb），
+ * 展示该大师标志形态的雏形，与原型 buildCardPreviews() 一致。
  */
 @Composable
 private fun CompanionOrbPreview(
     info: CompanionInfo,
     isSelected: Boolean
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "orb")
-    val rotate by infiniteTransition.animateFloat(
-        initialValue = 0f, targetValue = 360f,
-        animationSpec = infiniteRepeatable(tween(8000, easing = LinearEasing), RepeatMode.Restart),
-        label = "rot"
-    )
-
     val borderColor = if (isSelected) PurpleLight.copy(alpha = 0.5f) else info.tintColor.copy(alpha = 0.14f)
-    val glowColor = if (isSelected) PurpleLight.copy(alpha = 0.22f) else info.tintColor.copy(alpha = 0.08f)
 
     Box(
         modifier = Modifier
@@ -157,51 +149,9 @@ private fun CompanionOrbPreview(
             )
             .border(1.dp, borderColor, CircleShape)
     ) {
-        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-            val cx = size.width / 2f
-            val cy = size.height / 2f
-            val maxR = size.minDimension / 2f - 4f
-
-            // 外环
-            drawCircle(
-                color = info.tintColor.copy(alpha = 0.12f),
-                radius = maxR,
-                center = androidx.compose.ui.geometry.Offset(cx, cy),
-                style = Stroke(width = 1f)
-            )
-
-            // 轨道粒子
-            val count = 12
-            for (i in 0 until count) {
-                val angle = Math.toRadians((rotate + i * 360.0 / count).toDouble()).toFloat()
-                val r = maxR * (0.55f + 0.35f * (i % 3).toFloat() / 2f)
-                val x = cx + r * kotlin.math.cos(angle)
-                val y = cy + r * kotlin.math.sin(angle)
-                val particleR = 1.8f + (i % 3) * 0.8f
-                drawCircle(
-                    color = info.tintColor.copy(alpha = 0.4f + (i % 3) * 0.2f),
-                    radius = particleR,
-                    center = androidx.compose.ui.geometry.Offset(x, y)
-                )
-                // 辉光
-                drawCircle(
-                    color = info.tintColor.copy(alpha = 0.08f),
-                    radius = particleR * 3f,
-                    center = androidx.compose.ui.geometry.Offset(x, y)
-                )
-            }
-
-            // 中心光点
-            drawCircle(
-                color = info.tintColor.copy(alpha = 0.5f),
-                radius = 3f,
-                center = androidx.compose.ui.geometry.Offset(cx, cy)
-            )
-            drawCircle(
-                color = info.tintColor.copy(alpha = 0.15f),
-                radius = 8f,
-                center = androidx.compose.ui.geometry.Offset(cx, cy)
-            )
-        }
+        CompanionOrb(
+            companion = info,
+            modifier = Modifier.fillMaxSize()
+        )
     }
 }

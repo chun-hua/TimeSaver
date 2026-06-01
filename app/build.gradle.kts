@@ -13,8 +13,8 @@ android {
         applicationId = "com.ttime.wanliu"
         minSdk = 26
         targetSdk = 35
-        versionCode = 601
-        versionName = "v0601"
+        versionCode = 603
+        versionName = "v0603"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
