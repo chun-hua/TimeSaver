@@ -67,6 +67,13 @@ function show(id) {
   activeScreen = id;
   // start/stop overlay animation depending on screen
   startOverlayFor(id);
+  // History: track interruption when entering exit flow from focus
+  if (id === 's-exit-1' && currentSession && !activeInterruption) {
+    activeInterruption = { reason: '', outcome: 'pending' };
+  }
+  // Render history/stats when entering those screens
+  if (id === 's-history') renderHistory();
+  if (id === 's-stats') renderStats();
 }
 let activeScreen = 's-create';
 
@@ -212,6 +219,18 @@ function goFocus() {
   applyCompanionToFocus();
   focusTotal = selectedDur * 60;
   focusSecs  = focusTotal;
+  // Initialize session tracking
+  currentSession = {
+    id: Date.now(),
+    date: new Date().toISOString(),
+    task: name,
+    plannedMin: selectedDur,
+    companion: selectedCompanion,
+    theme: currentTheme,
+    style: selectedStyle,
+    interruptions: [],
+  };
+  activeInterruption = null;
   startFocusTick();
   show('s-focus');
 }
@@ -230,6 +249,7 @@ function startFocusTick() {
   focusTick = setInterval(() => {
     if (focusSecs > 0) focusSecs--;
     renderFocus();
+    if (focusSecs === 0) onFocusComplete();
   }, 1000);
 }
 function renderFocus() {
@@ -250,8 +270,10 @@ const circum = 2 * Math.PI * 60;
 function startCooldown() {
   // capture the written reason (kept gentle, just echo)
   const reason = document.getElementById('reason-input').value.trim();
-  document.getElementById('reason-echo').textContent = reason ? `“${reason}”` : '';
+  document.getElementById('reason-echo').textContent = reason ? `"${reason}"` : '';
   document.getElementById('reason-echo').style.display = reason ? 'block' : 'none';
+  // Record interruption reason
+  if (activeInterruption && reason) activeInterruption.reason = reason;
   show('s-exit-3');
   coolRunning = true;
   coolSecs = COOL_TOTAL;
@@ -273,9 +295,24 @@ function skipCooldown() {
   coolSecs = 3; renderCool();
 }
 
-function backToFocus() { startOverlayFor(); show('s-focus'); }
-function emergencyExit() { clearInterval(focusTick); clearInterval(coolTick); coolRunning=false; show('s-emergency'); }
-function resetToCreate() { clearInterval(focusTick); clearInterval(coolTick); coolRunning=false; show('s-create'); }
+function backToFocus() {
+  if (activeInterruption) { activeInterruption.outcome = 'returned'; activeInterruption = null; }
+  startOverlayFor(); show('s-focus');
+}
+function emergencyExit() {
+  clearInterval(focusTick); clearInterval(coolTick); coolRunning=false;
+  if (activeInterruption) { activeInterruption.outcome = 'emergency_exit'; activeInterruption = null; }
+  saveSession('abandoned');
+  show('s-emergency');
+}
+function resetToCreate() {
+  clearInterval(focusTick); clearInterval(coolTick); coolRunning=false;
+  if (currentSession) {
+    const status = currentSession.interruptions.length > 0 ? 'interrupted' : 'completed';
+    saveSession(status);
+  }
+  show('s-create');
+}
 
 /* ════════════════════════════════════════════════
    GENTLE ROTATING MESSAGES (cooldown)
@@ -318,6 +355,11 @@ document.addEventListener('keydown', e => {
     else if (activeScreen === 's-exit-1') backToFocus();
   }
   if (e.key.toLowerCase() === 'r' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) toggleOrientation();
+  if (e.key.toLowerCase() === 'h' && !['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) {
+    if (activeScreen === 's-history') show('s-stats');
+    else if (activeScreen === 's-stats') show('s-create');
+    else show('s-history');
+  }
 });
 
 /* ════════════════════════════════════════════════
@@ -557,248 +599,24 @@ const MUNGER_FORMS = [
     p('s',{x:.50,y:.40,rx:.12,ry:.10,n:40,c:[230,210,220],a:.35,_tc:[230,210,220]}),
   ],
 ];
-const SYM_ATOM = [ // Einstein · relativity / atom
-  p('e',{x:.5,y:.5,rx:.03,ry:.03,n:34,c:[255,255,255],a:1}),             // nucleus
-  p('r',{x:.5,y:.5,rx:.30,ry:.10,t:.04,n:74,c:[140,210,255],a:.8,rot:0}),
-  p('r',{x:.5,y:.5,rx:.30,ry:.10,t:.04,n:74,c:[140,210,255],a:.8,rot:1.05}),
-  p('r',{x:.5,y:.5,rx:.30,ry:.10,t:.04,n:74,c:[140,210,255],a:.8,rot:-1.05}),
-  p('e',{x:.80,y:.50,rx:.02,ry:.02,n:16,c:[125,211,252],a:1}),           // electrons
-  p('e',{x:.355,y:.31,rx:.018,ry:.018,n:14,c:[125,211,252],a:1}),
-  p('e',{x:.355,y:.69,rx:.018,ry:.018,n:14,c:[125,211,252],a:1}),
-];
-const SYM_LATTICE = [ // Munger · 多元思维模型 lattice grid
-  ...[.32,.44,.56,.68].map(x=>p('l',{x1:x,y1:.30,x2:x,y2:.70,w:.004,n:26,c:[167,139,250],a:.65})),
-  ...[.30,.42,.54,.66].map(y=>p('l',{x1:.30,y1:y,x2:.70,y2:y,w:.004,n:26,c:[167,139,250],a:.65})),
-  ...[.32,.44,.56,.68].flatMap(x=>[.30,.42,.54,.66].map(y=>p('e',{x,y,rx:.011,ry:.011,n:6,c:[214,202,255],a:.95}))),
-];
-const SYM_VITRUVIAN = [ // Da Vinci · 维特鲁威人
-  p('r',{x:.5,y:.52,rx:.32,ry:.32,t:.03,n:130,c:[240,206,150],a:.7}),    // circle
-  p('l',{x1:.20,y1:.22,x2:.80,y2:.22,w:.004,n:22,c:[224,196,150],a:.5}), // square
-  p('l',{x1:.20,y1:.82,x2:.80,y2:.82,w:.004,n:22,c:[224,196,150],a:.5}),
-  p('l',{x1:.20,y1:.22,x2:.20,y2:.82,w:.004,n:22,c:[224,196,150],a:.5}),
-  p('l',{x1:.80,y1:.22,x2:.80,y2:.82,w:.004,n:22,c:[224,196,150],a:.5}),
-  p('e',{x:.5,y:.30,rx:.045,ry:.05,n:32,c:[244,222,180],a:.72}),         // head
-  p('l',{x1:.5,y1:.35,x2:.5,y2:.62,w:.006,n:26,c:[242,220,180],a:.7}),   // torso
-  p('l',{x1:.5,y1:.42,x2:.24,y2:.35,w:.005,n:18,c:[242,220,180],a:.6}),  // arms (spread + raised)
-  p('l',{x1:.5,y1:.42,x2:.76,y2:.35,w:.005,n:18,c:[242,220,180],a:.6}),
-  p('l',{x1:.5,y1:.42,x2:.26,y2:.47,w:.005,n:14,c:[242,220,180],a:.5}),
-  p('l',{x1:.5,y1:.42,x2:.74,y2:.47,w:.005,n:14,c:[242,220,180],a:.5}),
-  p('l',{x1:.5,y1:.62,x2:.40,y2:.81,w:.006,n:18,c:[242,220,180],a:.6}),  // legs
-  p('l',{x1:.5,y1:.62,x2:.60,y2:.81,w:.006,n:18,c:[242,220,180],a:.6}),
-];
 
-/* Each companion → array of "forms" (演变形态). Coords normalized 0..1, y down.
-   Jobs: 8-stage narrative arc (初心→连线→聚焦→交汇→力场→涅槃→死亡→前行) */
+/* Each companion → 8-stage narrative builders.
+   9 masters: Jobs, Munger, Feynman, Taleb, Musk, Naval, Paul Graham,
+   Einstein, Da Vinci, Zhang Yiming, Sun Yuchen */
 const C_FORMS = {
   jobs: buildJobsStages(),
   munger: buildMungerStages(),
-  einstein: [
-    [ // 🌌 时空曲率 — 引力透镜同心环 + 中心质量点
-      ...[0.06,0.12,0.18,0.24,0.30].map(r =>
-        p('r',{x:.50,y:.50,rx:r,ry:r,t:.018,n:Math.floor(30+r*140),c:[110,185,235],a:.38+r*.5})
-      ),
-      p('e',{x:.50,y:.50,rx:.028,ry:.028,n:40,c:[200,235,255],a:.96}),     // 中心奇点
-      p('e',{x:.50,y:.50,rx:.06,ry:.06,n:22,c:[140,210,255],a:.55}),        // 内层辉光
-      // 引力透镜弧 — 四段弯曲射线
-      p('arc',{x:.50,y:.50,rx:.35,ry:.35,a0:5.6,a1:0.7,t:.025,n:40,c:[120,200,250],a:.55}),
-      p('arc',{x:.50,y:.50,rx:.35,ry:.35,a0:2.4,a1:3.8,t:.025,n:40,c:[120,200,250],a:.50}),
-    ],
-    (n) => fromCandidates(textPoints('E=mc²', { fs:80, weight:800 }), n, [140,210,255], .95), // 质能方程
-    SYM_ATOM, // 原子
-  ],
-  davinci: [
-    [ // ✈️ 飞行器机翼 — 双弧翼展 + 中心机身
-      p('arc',{x:.50,y:.48,rx:.30,ry:.18,a0:3.3,a1:6.0,t:.06,n:100,c:[235,205,155],a:.68}),  // 左上翼弧
-      p('arc',{x:.50,y:.48,rx:.30,ry:.18,a0:0.0,a1:3.0,t:.06,n:100,c:[235,205,155],a:.68}),  // 右上翼弧
-      p('arc',{x:.50,y:.48,rx:.16,ry:.10,a0:3.2,a1:6.1,t:.04,n:50,c:[245,218,170],a:.55}),   // 内层翼骨
-      p('arc',{x:.50,y:.48,rx:.16,ry:.10,a0:0.0,a1:3.1,t:.04,n:50,c:[245,218,170],a:.55}),   // 内层翼骨
-      p('e',{x:.50,y:.54,rx:.05,ry:.09,n:36,c:[225,195,148],a:.74}),                          // 机身
-      p('l',{x1:.50,y1:.60,x2:.50,y2:.82,w:.008,n:20,c:[210,180,132],a:.65}),                  // 尾舵
-      p('e',{x:.50,y:.42,rx:.048,ry:.04,n:28,c:[245,225,178],a:.80}),                          // 机首
-      p('e',{x:.50,y:.48,rx:.025,ry:.025,n:14,c:[255,240,200],a:.88}),                         // 中心轴
-    ],
-    SYM_VITRUVIAN, // 维特鲁威人
-    (n) => spiralForm(n, [244,214,160]), // 黄金螺旋
-  ],
-  /* ── 费曼 · Feynman diagrams + question mark ── */
-  feynman: [
-    [ // 原子轨道 — 交叉椭圆环
-      p('e',{x:.5,y:.5,rx:.03,ry:.03,n:34,c:[100,195,215],a:1}),
-      p('r',{x:.5,y:.5,rx:.30,ry:.10,t:.035,n:70,c:[100,195,215],a:.7,rot:0.6}),
-      p('r',{x:.5,y:.5,rx:.25,ry:.10,t:.035,n:60,c:[100,195,215],a:.65,rot:-1.0}),
-      p('r',{x:.5,y:.5,rx:.20,ry:.10,t:.03,n:50,c:[100,195,215],a:.55,rot:2.2}),
-      p('e',{x:.72,y:.45,rx:.015,ry:.015,n:12,c:[130,220,240],a:.9}),
-      p('e',{x:.40,y:.30,rx:.015,ry:.015,n:12,c:[130,220,240],a:.9}),
-    ],
-    [ // 费曼图 — 波浪线交叉
-      p('l',{x1:.20,y1:.55,x2:.80,y2:.55,w:.004,n:26,c:[130,210,230],a:.6}),
-      p('l',{x1:.50,y1:.20,x2:.50,y2:.80,w:.004,n:26,c:[130,210,230],a:.6}),
-      p('arc',{x:.50,y:.55,rx:.12,ry:.08,a0:4.0,a1:5.6,t:.018,n:50,c:[100,195,215],a:.7}),
-      p('arc',{x:.50,y:.55,rx:.12,ry:.08,a0:0.8,a1:2.4,t:.018,n:50,c:[100,195,215],a:.7}),
-      p('e',{x:.50,y:.55,rx:.025,ry:.025,n:24,c:[255,255,255],a:.9}),
-    ],
-    [ // 问号 — cargo cult检测
-      p('arc',{x:.50,y:.38,rx:.14,ry:.12,a0:1.5,a1:5.8,t:.04,n:90,c:[100,195,215],a:.7}),
-      p('e',{x:.50,y:.68,rx:.02,ry:.02,n:16,c:[100,195,215],a:.85}),
-      p('l',{x1:.50,y1:.62,x2:.50,y2:.74,w:.004,n:16,c:[100,195,215],a:.8}),
-      p('s',{x:.50,y:.42,rx:.04,ry:.04,n:40,c:[130,220,240],a:.5}),
-    ],
-  ],
-  /* ── 塔勒布 · Black Swan + Barbell ── */
-  taleb: [
-    [ // 黑天鹅 — 优雅弧线+翅膀
-      p('arc',{x:.50,y:.52,rx:.24,ry:.14,a0:4.0,a1:5.5,t:.04,n:80,c:[215,165,95],a:.75}),
-      p('arc',{x:.50,y:.52,rx:.24,ry:.14,a0:0.8,a1:2.3,t:.04,n:80,c:[215,165,95],a:.75}),
-      p('arc',{x:.50,y:.52,rx:.16,ry:.09,a0:3.8,a1:5.7,t:.03,n:50,c:[235,190,120],a:.65}),
-      p('arc',{x:.50,y:.52,rx:.16,ry:.09,a0:0.5,a1:2.5,t:.03,n:50,c:[235,190,120],a:.65}),
-      p('e',{x:.50,y:.56,rx:.04,ry:.10,n:36,c:[225,180,110],a:.75}),
-    ],
-    [ // 杠铃策略 — 两极+连接杆
-      p('e',{x:.20,y:.50,rx:.06,ry:.06,n:40,c:[215,165,95],a:.85}),
-      p('e',{x:.80,y:.50,rx:.06,ry:.06,n:40,c:[215,165,95],a:.85}),
-      p('l',{x1:.26,y1:.50,x2:.74,y2:.50,w:.006,n:50,c:[215,165,95],a:.65}),
-      p('e',{x:.20,y:.50,rx:.10,ry:.10,n:24,c:[240,200,140],a:.3}),
-      p('e',{x:.80,y:.50,rx:.10,ry:.10,n:24,c:[240,200,140],a:.3}),
-    ],
-    [ // 反脆弱九头蛇 — 多头再生
-      p('e',{x:.50,y:.48,rx:.06,ry:.10,n:40,c:[215,165,95],a:.7}),
-      p('arc',{x:.50,y:.34,rx:.05,ry:.15,a0:3.8,a1:5.6,t:.025,n:30,c:[215,165,95],a:.55}),
-      p('arc',{x:.50,y:.34,rx:.05,ry:.15,a0:0.5,a1:2.5,t:.025,n:30,c:[215,165,95],a:.55}),
-      p('arc',{x:.50,y:.34,rx:.04,ry:.12,a0:3.9,a1:5.5,t:.02,n:25,c:[240,200,140],a:.45}),
-      p('arc',{x:.50,y:.34,rx:.04,ry:.12,a0:0.6,a1:2.4,t:.02,n:25,c:[240,200,140],a:.45}),
-    ],
-  ],
-  /* ── 马斯克 · Rocket + First Principles ── */
-  musk: [
-    [ // 火箭 — 椭圆机身+翼片
-      p('e',{x:.50,y:.45,rx:.05,ry:.22,n:80,c:[210,65,45],a:.75}),
-      p('e',{x:.50,y:.24,rx:.04,ry:.06,n:30,c:[240,100,80],a:.65}),
-      p('l',{x1:.50,y1:.58,x2:.32,y2:.74,w:.005,n:22,c:[210,65,45],a:.6}),
-      p('l',{x1:.50,y1:.58,x2:.68,y2:.74,w:.005,n:22,c:[210,65,45],a:.6}),
-      p('l',{x1:.50,y1:.68,x2:.50,y2:.85,w:.005,n:18,c:[240,100,80],a:.5}),
-      p('s',{x:.50,y:.78,rx:.06,ry:.04,n:40,c:[255,140,100],a:.4}),
-    ],
-    [ // 第一性原理 — 原子分解
-      p('e',{x:.50,y:.50,rx:.04,ry:.04,n:28,c:[255,255,255],a:.9}),
-      p('r',{x:.50,y:.50,rx:.12,ry:.12,t:.03,n:40,c:[210,65,45],a:.7}),
-      p('r',{x:.50,y:.50,rx:.22,ry:.22,t:.025,n:50,c:[210,65,45],a:.55}),
-      p('r',{x:.50,y:.50,rx:.32,ry:.32,t:.02,n:60,c:[210,65,45],a:.35}),
-      p('l',{x1:.50,y1:.50,x2:.65,y2:.20,w:.003,n:16,c:[240,100,80],a:.5}),
-      p('l',{x1:.50,y1:.50,x2:.28,y2:.72,w:.003,n:16,c:[240,100,80],a:.5}),
-    ],
-    [ // X — 颠覆
-      p('l',{x1:.22,y1:.26,x2:.78,y2:.74,w:.012,n:60,c:[210,65,45],a:.7}),
-      p('l',{x1:.78,y1:.26,x2:.22,y2:.74,w:.012,n:60,c:[210,65,45],a:.7}),
-      p('e',{x:.50,y:.50,rx:.03,ry:.03,n:20,c:[255,160,120],a:.85}),
-    ],
-  ],
-  /* ── 纳瓦尔 · Leverage + Specific Knowledge ── */
-  naval: [
-    [ // 杠杆天平
-      p('l',{x1:.50,y1:.20,x2:.50,y2:.50,w:.006,n:26,c:[185,165,120],a:.7}),
-      p('l',{x1:.28,y1:.62,x2:.72,y2:.62,w:.006,n:40,c:[185,165,120],a:.65}),
-      p('e',{x:.28,y:.62,rx:.04,ry:.04,n:24,c:[210,190,145],a:.7}),
-      p('e',{x:.72,y:.62,rx:.04,ry:.04,n:24,c:[210,190,145],a:.7}),
-      p('e',{x:.50,y:.50,rx:.02,ry:.02,n:10,c:[255,235,200],a:.85}),
-    ],
-    [ // 知识之脑
-      p('e',{x:.50,y:.44,rx:.22,ry:.20,n:100,c:[185,165,120],a:.5}),
-      p('arc',{x:.50,y:.44,rx:.22,ry:.20,a0:0,a1:6.283,t:.02,n:60,c:[185,165,120],a:.6}),
-      p('arc',{x:.38,y:.36,rx:.05,ry:.08,a0:0.5,a1:2.6,t:.015,n:28,c:[210,190,145],a:.55}),
-      p('arc',{x:.62,y:.36,rx:.05,ry:.08,a0:0.5,a1:2.6,t:.015,n:28,c:[210,190,145],a:.55}),
-      p('e',{x:.50,y:.44,rx:.05,ry:.05,n:28,c:[255,235,200],a:.55}),
-    ],
-    [ // 上升箭头 — compounding
-      p('l',{x1:.50,y1:.74,x2:.50,y2:.26,w:.012,n:40,c:[185,165,120],a:.7}),
-      p('l',{x1:.50,y1:.26,x2:.34,y2:.40,w:.010,n:30,c:[185,165,120],a:.65}),
-      p('l',{x1:.50,y1:.26,x2:.66,y2:.40,w:.010,n:30,c:[185,165,120],a:.65}),
-      p('s',{x:.50,y:.50,rx:.20,ry:.22,n:60,c:[210,190,145],a:.3}),
-    ],
-  ],
-  /* ── Paul Graham · Do Things That Don't Scale ── */
-  pg: [
-    [ // 笔/键盘 — 写作
-      p('l',{x1:.46,y1:.22,x2:.46,y2:.78,w:.008,n:40,c:[140,165,185],a:.7}),
-      p('l',{x1:.46,y1:.22,x2:.56,y2:.26,w:.008,n:20,c:[140,165,185],a:.65}),
-      p('l',{x1:.46,y1:.78,x2:.54,y2:.74,w:.008,n:20,c:[140,165,185],a:.65}),
-      p('e',{x:.51,y:.22,rx:.025,ry:.025,n:14,c:[170,190,210],a:.8}),
-      p('l',{x1:.34,y1:.32,x2:.58,y2:.32,w:.004,n:16,c:[170,190,210],a:.5}),
-      p('l',{x1:.34,y1:.38,x2:.58,y2:.38,w:.004,n:16,c:[170,190,210],a:.5}),
-    ],
-    [ // 阶梯 — YC成长
-      p('l',{x1:.24,y1:.66,x2:.40,y2:.66,w:.008,n:24,c:[140,165,185],a:.65}),
-      p('l',{x1:.40,y1:.66,x2:.40,y2:.50,w:.008,n:18,c:[140,165,185],a:.65}),
-      p('l',{x1:.40,y1:.50,x2:.56,y2:.50,w:.008,n:24,c:[140,165,185],a:.7}),
-      p('l',{x1:.56,y1:.50,x2:.56,y2:.34,w:.008,n:18,c:[140,165,185],a:.7}),
-      p('l',{x1:.56,y1:.34,x2:.72,y2:.34,w:.008,n:24,c:[140,165,185],a:.75}),
-      p('e',{x:.72,y:.34,rx:.02,ry:.02,n:12,c:[255,255,255],a:.8}),
-    ],
-    [ // 二叉树 — Lisp/递归
-      p('l',{x1:.50,y1:.28,x2:.30,y2:.50,w:.006,n:26,c:[140,165,185],a:.6}),
-      p('l',{x1:.50,y1:.28,x2:.70,y2:.50,w:.006,n:26,c:[140,165,185],a:.6}),
-      p('l',{x1:.30,y1:.50,x2:.18,y2:.70,w:.005,n:20,c:[140,165,185],a:.5}),
-      p('l',{x1:.30,y1:.50,x2:.42,y2:.70,w:.005,n:20,c:[140,165,185],a:.5}),
-      p('l',{x1:.70,y1:.50,x2:.58,y2:.70,w:.005,n:20,c:[140,165,185],a:.5}),
-      p('l',{x1:.70,y1:.50,x2:.82,y2:.70,w:.005,n:20,c:[140,165,185],a:.5}),
-      p('e',{x:.50,y:.28,rx:.02,ry:.02,n:12,c:[255,255,255],a:.8}),
-    ],
-  ],
-  /* ── 张一鸣 · Algorithm + Delay Gratification ── */
-  zhangyiming: [
-    [ // 数据流网络 — 节点+连线
-      p('e',{x:.50,y:.30,rx:.02,ry:.02,n:12,c:[80,140,200],a:.85}),
-      p('e',{x:.32,y:.50,rx:.02,ry:.02,n:12,c:[80,140,200],a:.85}),
-      p('e',{x:.68,y:.50,rx:.02,ry:.02,n:12,c:[80,140,200],a:.85}),
-      p('e',{x:.38,y:.68,rx:.02,ry:.02,n:12,c:[80,140,200],a:.85}),
-      p('e',{x:.62,y:.68,rx:.02,ry:.02,n:12,c:[80,140,200],a:.85}),
-      p('l',{x1:.50,y1:.30,x2:.32,y2:.50,w:.003,n:18,c:[80,140,200],a:.45}),
-      p('l',{x1:.50,y1:.30,x2:.68,y2:.50,w:.003,n:18,c:[80,140,200],a:.45}),
-      p('l',{x1:.32,y1:.50,x2:.38,y2:.68,w:.003,n:18,c:[80,140,200],a:.45}),
-      p('l',{x1:.68,y1:.50,x2:.62,y2:.68,w:.003,n:18,c:[80,140,200],a:.45}),
-      p('l',{x1:.32,y1:.50,x2:.68,y2:.50,w:.003,n:18,c:[80,140,200],a:.4}),
-      p('l',{x1:.38,y1:.68,x2:.62,y2:.68,w:.003,n:18,c:[80,140,200],a:.4}),
-      p('r',{x:.50,y:.50,rx:.28,ry:.28,t:.02,n:60,c:[80,140,200],a:.25}),
-    ],
-    [ // 时钟/延迟满足
-      p('r',{x:.50,y:.50,rx:.24,ry:.24,t:.025,n:90,c:[80,140,200],a:.55}),
-      p('l',{x1:.50,y1:.50,x2:.50,y2:.32,w:.005,n:22,c:[80,140,200],a:.75}),
-      p('l',{x1:.50,y1:.50,x2:.61,y2:.44,w:.003,n:16,c:[80,140,200],a:.55}),
-      p('e',{x:.50,y:.50,rx:.015,ry:.015,n:10,c:[255,255,255],a:.85}),
-    ],
-    [ // 地球/全球化
-      p('r',{x:.50,y:.50,rx:.26,ry:.26,t:.02,n:100,c:[80,140,200],a:.5}),
-      p('arc',{x:.50,y:.50,rx:.26,ry:.26,a0:0.8,a1:2.3,t:.015,n:40,c:[80,140,200],a:.45}),
-      p('arc',{x:.50,y:.50,rx:.26,ry:.26,a0:3.9,a1:5.5,t:.015,n:40,c:[80,140,200],a:.45}),
-      p('l',{x1:.30,y1:.50,x2:.70,y2:.50,w:.003,n:20,c:[80,140,200],a:.5}),
-      p('l',{x1:.50,y1:.30,x2:.50,y2:.70,w:.003,n:20,c:[80,140,200],a:.5}),
-    ],
-  ],
-  /* ── 孙宇晨 · 注意力喇叭 + 金色圈 ── */
-  sunyuchen: [
-    [ // 扩音器/喇叭 — 注意力营销
-      p('l',{x1:.44,y1:.40,x2:.34,y2:.28,w:.010,n:30,c:[255,175,30],a:.7}),
-      p('l',{x1:.56,y1:.40,x2:.66,y2:.28,w:.010,n:30,c:[255,175,30],a:.7}),
-      p('l',{x1:.44,y1:.40,x2:.44,y2:.68,w:.008,n:30,c:[255,175,30],a:.65}),
-      p('l',{x1:.56,y1:.40,x2:.56,y2:.68,w:.008,n:30,c:[255,175,30],a:.65}),
-      p('r',{x:.50,y:.68,rx:.12,ry:.04,t:.015,n:40,c:[255,175,30],a:.55}),
-      p('s',{x:.40,y:.26,rx:.08,ry:.06,n:50,c:[255,200,80],a:.5}),
-    ],
-    [ // 金色圆圈 — 财富
-      p('r',{x:.50,y:.50,rx:.30,ry:.30,t:.04,n:110,c:[255,175,30],a:.65}),
-      p('r',{x:.50,y:.50,rx:.18,ry:.18,t:.03,n:70,c:[255,200,80],a:.5}),
-      p('e',{x:.50,y:.50,rx:.04,ry:.04,n:24,c:[255,255,200],a:.8}),
-      p('e',{x:.50,y:.50,rx:.12,ry:.12,n:36,c:[255,220,120],a:.25}),
-    ],
-    [ // 火焰/爆炸 — 争议
-      p('l',{x1:.50,y1:.72,x2:.50,y2:.30,w:.010,n:30,c:[255,175,30],a:.7}),
-      p('l',{x1:.50,y1:.44,x2:.34,y2:.28,w:.008,n:24,c:[255,200,80],a:.6}),
-      p('l',{x1:.50,y1:.44,x2:.66,y2:.28,w:.008,n:24,c:[255,200,80],a:.6}),
-      p('l',{x1:.50,y1:.36,x2:.40,y2:.18,w:.006,n:20,c:[255,220,120],a:.5}),
-      p('l',{x1:.50,y1:.36,x2:.60,y2:.18,w:.006,n:20,c:[255,220,120],a:.5}),
-      p('s',{x:.50,y:.30,rx:.12,ry:.10,n:60,c:[255,200,80],a:.4}),
-    ],
-  ],
+  feynman: buildFeynmanStages(),
+  taleb: buildTalebStages(),
+  musk: buildMuskStages(),
+  naval: buildNavalStages(),
+  pg: buildPGStages(),
+  einstein: buildEinsteinStages(),
+  davinci: buildDaVinciStages(),
+  zhangyiming: buildZYMsStages(),
+  sunyuchen: buildSunStages(),
 };
+
 
 function easeIO(t){ return t < .5 ? 4*t*t*t : 1 - Math.pow(-2*t+2,3)/2; }
 
@@ -923,13 +741,12 @@ class ParticleMorph {
     this.t0 = performance.now(); this.phase='morph';
   }
   _getStageTint(idx) {
-    if (this.key === 'jobs' && JOB_STAGES[idx]) {
-      return JOB_STAGES[idx].tint;
-    }
-    if (this.key === 'munger' && MUNGER_STAGES[idx]) {
-      return MUNGER_STAGES[idx].tint;
-    }
-    return null;  // use form's default colors
+    const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
+      taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
+      pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
+      zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+    const table = stageTables[this.key];
+    return (table && table[idx]) ? table[idx].tint : null;
   }
   _getStageTintStr(idx) {
     const t = this._getStageTint(idx);
@@ -952,9 +769,12 @@ class ParticleMorph {
     this.retargetTo(buildForm(this.forms[next], this.count, stageTint), next);
     // Notify stage change
     if (this.onStageChange) {
-      const stageMeta = this.key === 'jobs' ? JOB_STAGES[next]
-                      : this.key === 'munger' ? MUNGER_STAGES[next]
-                      : null;
+      const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
+        taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
+        pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
+        zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+      const table = stageTables[this.key];
+      const stageMeta = table ? table[next] : null;
       this.onStageChange(next, stageMeta);
     }
   }
@@ -1080,17 +900,425 @@ function applyCompanionToFocus(){
   requestAnimationFrame(() => focusMorph.resize());
 }
 
-/* ── Stage indicator dots for Jobs narrative ── */
+/* ── Stage indicator dots (dynamic per companion) ── */
 function updateStageDots(idx) {
   const el = document.getElementById('stage-dots');
   if (!el) return;
+  const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
+    taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
+    pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
+    zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+  const table = stageTables[selectedCompanion];
+  const total = table ? table.length : 3;
   let html = '';
-  for (let i = 0; i < JOB_STAGES.length; i++) {
+  for (let i = 0; i < total; i++) {
     if (i < idx) html += '<span class="sdot past"></span>';
     else if (i === idx) html += '<span class="sdot current"></span>';
     else html += '<span class="sdot"></span>';
   }
   el.innerHTML = html;
+}
+
+/* ════════════════════════════════════════════════
+   HISTORY — session recording & rendering
+   ════════════════════════════════════════════════ */
+const HISTORY_KEY = 'wanliu_history_v1';
+let currentSession = null;
+let activeInterruption = null;
+let allSessions = [];
+let histFilter = 'all';
+let histPage = 0;
+const HIST_PAGE_SIZE = 10;
+
+function loadHistory() {
+  try {
+    const raw = localStorage.getItem(HISTORY_KEY);
+    allSessions = raw ? JSON.parse(raw) : [];
+  } catch (e) { allSessions = []; }
+}
+
+function saveHistory() {
+  try { localStorage.setItem(HISTORY_KEY, JSON.stringify(allSessions)); } catch (e) {}
+}
+
+function saveSession(status) {
+  if (!currentSession) return;
+  // Push any pending interruption
+  if (activeInterruption && activeInterruption.reason) {
+    if (activeInterruption.outcome === 'pending') activeInterruption.outcome = 'left_after_cooldown';
+    currentSession.interruptions.push({ ...activeInterruption });
+  }
+  activeInterruption = null;
+  // Calculate actual focus time
+  const elapsed = focusTotal - focusSecs;
+  currentSession.actualMin = Math.round(elapsed / 60);
+  currentSession.status = status;
+  currentSession.id = Date.now();
+  currentSession.date = new Date().toISOString();
+  // Prepend to history
+  allSessions.unshift(currentSession);
+  // Keep max 200 entries
+  if (allSessions.length > 200) allSessions = allSessions.slice(0, 200);
+  saveHistory();
+  currentSession = null;
+}
+
+function onFocusComplete() {
+  clearInterval(focusTick);
+  if (activeInterruption) { activeInterruption.outcome = 'returned'; activeInterruption = null; }
+  saveSession('completed');
+  // Show a gentle completion message then return to create
+  setTimeout(() => {
+    const clock = document.getElementById('focus-clock');
+    if (clock) clock.textContent = '完成!';
+    const msg = document.querySelector('.tb-msg');
+    if (msg) msg.textContent = '你做到了。每一分钟的专注，\n都是对自己的温柔承诺。';
+  }, 200);
+  setTimeout(() => show('s-create'), 3000);
+}
+
+/* ── Companion display names ── */
+const COMPANION_NAMES = {
+  none:'独自专注', jobs:'乔布斯', munger:'芒格', feynman:'费曼', taleb:'塔勒布',
+  musk:'马斯克', naval:'纳瓦尔', pg:'Paul Graham', einstein:'爱因斯坦',
+  davinci:'达·芬奇', zhangyiming:'张一鸣', sunyuchen:'孙宇晨'
+};
+
+/* ── Render history list ── */
+function renderHistory() {
+  histPage = 0;
+  _renderHistoryList();
+  _renderSummary();
+}
+
+function _renderHistoryList() {
+  const list = document.getElementById('hist-list');
+  const empty = document.getElementById('hist-empty');
+  const more = document.getElementById('hist-more');
+  if (!list) return;
+
+  let filtered = allSessions;
+  if (histFilter === 'completed') filtered = allSessions.filter(s => s.status === 'completed');
+  else if (histFilter === 'interrupted') filtered = allSessions.filter(s => s.interruptions && s.interruptions.length > 0);
+
+  const page = filtered.slice(0, (histPage + 1) * HIST_PAGE_SIZE);
+
+  if (filtered.length === 0) {
+    list.innerHTML = '';
+    if (empty) empty.style.display = 'block';
+    if (more) more.style.display = 'none';
+    return;
+  }
+  if (empty) empty.style.display = 'none';
+
+  list.innerHTML = page.map(s => {
+    const d = new Date(s.date);
+    const dateStr = isToday(d) ? '今天' : isYesterday(d) ? '昨天' : fmtDate(d);
+    const timeStr = fmtTime(d);
+    const dur = s.actualMin || 0;
+    const statusCls = s.status === 'completed' ? 'done' : s.status === 'interrupted' ? 'partial' : 'gaveup';
+    const statusLabel = s.status === 'completed' ? '已完成' : s.status === 'interrupted' ? '提前结束' : '已放弃';
+    const cardCls = s.status === 'completed' ? 'completed' : s.status === 'interrupted' ? 'interrupted' : 'abandoned';
+    const compName = COMPANION_NAMES[s.companion] || '独自专注';
+    const themeNames = { rain:'雨夜', library:'图书馆', forest:'森林', cyber:'赛博桌面' };
+    const themeName = themeNames[s.theme] || s.theme || '';
+    const durColor = s.status === 'completed' ? '#f0f0f5' : s.status === 'interrupted' ? '#f59e0b' : '#6b7280';
+
+    const ints = s.interruptions || [];
+    const intsHTML = ints.length > 0 ? `
+      <div class="hcard-ints">
+        <div class="int-label">⚠️ 打断记录 · ${ints.length} 次</div>
+        ${ints.map(ir => {
+          const outcomeCls = ir.outcome === 'returned' ? 'returned' : 'left';
+          const outcomeLabel = ir.outcome === 'returned' ? '→ 返回继续'
+            : ir.outcome === 'left_after_cooldown' ? '→ 冷静后离开'
+            : ir.outcome === 'emergency_exit' ? '→ 紧急退出'
+            : '→ 离开';
+          return `<div class="int-row">
+            <span class="int-dot"></span>
+            <span class="int-reason">${escHtml(ir.reason || '未记录原因')}</span>
+            <span class="int-outcome ${outcomeCls}">${outcomeLabel}</span>
+          </div>`;
+        }).join('')}
+      </div>` : '';
+
+    return `<div class="hcard ${cardCls}">
+      <div class="hcard-top">
+        <span class="hcard-date">${dateStr} · ${timeStr}</span>
+        <span class="hcard-status ${statusCls}">${statusLabel}</span>
+      </div>
+      <div class="hcard-body">
+        <div class="hcard-icon">${taskIcon(s.task)}</div>
+        <div class="hcard-info">
+          <div class="hcard-task">${escHtml(s.task)}</div>
+          <div class="hcard-meta">
+            ${compName !== '独自专注' ? `<span><span class="mdot comp"></span>${compName}</span>` : `<span>独自专注</span>`}
+            <span>${themeName}</span>
+          </div>
+        </div>
+        <div class="hcard-dur" style="color:${durColor};">
+          ${dur}<small>分钟</small>
+        </div>
+      </div>${intsHTML}
+    </div>`;
+  }).join('');
+
+  if (more) more.style.display = filtered.length > page.length ? 'block' : 'none';
+}
+
+function loadMoreHistory() {
+  histPage++;
+  _renderHistoryList();
+}
+
+function filterHistory(filter, el) {
+  histFilter = filter;
+  histPage = 0;
+  document.querySelectorAll('.fpill').forEach(p => p.classList.remove('active'));
+  if (el) el.classList.add('active');
+  _renderHistoryList();
+}
+
+function _renderSummary() {
+  const el = document.getElementById('hist-summary');
+  if (!el) return;
+  const todaySessions = allSessions.filter(s => isToday(new Date(s.date)));
+  const todayMin = todaySessions.reduce((a, s) => a + (s.actualMin || 0), 0);
+  const todayCount = todaySessions.length;
+  const completedCount = todaySessions.filter(s => s.status === 'completed').length;
+  const compRate = todayCount > 0 ? Math.round(completedCount / todayCount * 100) : 0;
+  el.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value accent">${todayMin}<span style="font-size:12px;font-weight:400;">分</span></div>
+      <div class="stat-label">今日专注</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value">${todayCount}<span style="font-size:12px;font-weight:400;">次</span></div>
+      <div class="stat-label">今日会话</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value good">${compRate}<span style="font-size:12px;font-weight:400;">%</span></div>
+      <div class="stat-label">完成率</div>
+    </div>`;
+}
+
+/* ── Render weekly stats ── */
+function renderStats() {
+  _renderWeekLabel();
+  _renderWeekChart();
+  _renderStatsSummary();
+  _renderInterruptReasons();
+  _renderBestSlot();
+}
+
+function _renderWeekLabel() {
+  const el = document.getElementById('stats-week-label');
+  if (!el) return;
+  const now = new Date();
+  const day = now.getDay(); // 0=Sun
+  const monday = new Date(now); monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  const sunday = new Date(monday); sunday.setDate(monday.getDate() + 6);
+  el.textContent = `${monday.getMonth()+1}/${monday.getDate()}-${sunday.getMonth()+1}/${sunday.getDate()}`;
+}
+
+function _getWeekData() {
+  const now = new Date();
+  const day = now.getDay();
+  const monday = new Date(now); monday.setDate(now.getDate() - (day === 0 ? 6 : day - 1));
+  monday.setHours(0,0,0,0);
+  const days = [];
+  for (let i = 0; i < 7; i++) {
+    const d = new Date(monday); d.setDate(monday.getDate() + i);
+    const next = new Date(d); next.setDate(d.getDate() + 1);
+    const sessions = allSessions.filter(s => {
+      const sd = new Date(s.date);
+      return sd >= d && sd < next;
+    });
+    const focusMin = sessions.reduce((a, s) => a + (s.actualMin || 0), 0);
+    const intCount = sessions.reduce((a, s) => a + (s.interruptions || []).length, 0);
+    days.push({ date: d, focusMin, intCount, sessions });
+  }
+  return days;
+}
+
+function _renderWeekChart() {
+  const el = document.getElementById('week-chart');
+  if (!el) return;
+  const week = _getWeekData();
+  const dayNames = ['一','二','三','四','五','六','日'];
+  const today = new Date();
+  const todayIdx = (today.getDay() + 6) % 7; // Mon=0
+  const totalMin = week.reduce((a, d) => a + d.focusMin, 0);
+  const totalH = (totalMin / 60).toFixed(1);
+  const maxMin = Math.max(1, ...week.map(d => d.focusMin + d.intCount * 5));
+
+  el.innerHTML = `
+    <div class="wc-head">
+      <h4>每日专注时长</h4>
+      <span class="wc-total">总计 ${totalH}h</span>
+    </div>
+    <div class="bar-row">
+      ${week.map((d, i) => {
+        const fh = Math.max(4, (d.focusMin / maxMin) * 90);
+        const ih = Math.max(0, (d.intCount * 5 / maxMin) * 90);
+        const isToday = i === todayIdx;
+        return `<div class="bar-col">
+          <div class="bar-stack">
+            ${d.intCount > 0 ? `<div class="bar-seg interrupt" style="height:${ih}px;"></div>` : ''}
+            <div class="bar-seg focus" style="height:${fh}px;"></div>
+          </div>
+          <span class="bar-label${isToday ? ' today' : ''}">${dayNames[i]}</span>
+        </div>`;
+      }).join('')}
+    </div>
+    <div class="bar-legend">
+      <span><span class="swatch" style="background:rgba(124,58,237,.55);"></span> 专注</span>
+      <span><span class="swatch" style="background:rgba(245,158,11,.38);"></span> 打断</span>
+    </div>`;
+}
+
+function _renderStatsSummary() {
+  const el = document.getElementById('stats-summary');
+  if (!el) return;
+  const week = _getWeekData();
+  const thisWeek = week.reduce((a, d) => a + d.focusMin, 0);
+  // Compare with last week
+  const lastWeekStart = new Date(week[0].date); lastWeekStart.setDate(lastWeekStart.getDate() - 7);
+  const lastWeekEnd = new Date(week[6].date); lastWeekEnd.setDate(lastWeekEnd.getDate() - 7);
+  const lastWeekSessions = allSessions.filter(s => {
+    const sd = new Date(s.date);
+    return sd >= lastWeekStart && sd <= new Date(lastWeekEnd.getTime() + 86400000);
+  });
+  const lastWeekMin = lastWeekSessions.reduce((a, s) => a + (s.actualMin || 0), 0);
+  const change = lastWeekMin > 0 ? Math.round((thisWeek - lastWeekMin) / lastWeekMin * 100) : 0;
+
+  // Streak
+  let streak = 0;
+  const today = new Date(); today.setHours(0,0,0,0);
+  for (let i = 0; i < 365; i++) {
+    const d = new Date(today); d.setDate(today.getDate() - i);
+    const next = new Date(d); next.setDate(d.getDate() + 1);
+    const hasSession = allSessions.some(s => {
+      const sd = new Date(s.date);
+      return sd >= d && sd < next;
+    });
+    if (hasSession) streak++;
+    else break;
+  }
+
+  // Average
+  const totalSessions = allSessions.length;
+  const avgMin = totalSessions > 0 ? Math.round(allSessions.reduce((a,s) => a+(s.actualMin||0), 0) / totalSessions) : 0;
+
+  el.innerHTML = `
+    <div class="stat-card">
+      <div class="stat-value${change >= 0 ? ' good' : ''}" style="font-size:16px;">${change >= 0 ? '↑' : '↓'} ${Math.abs(change)}%</div>
+      <div class="stat-label">vs 上周</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value" style="font-size:16px;">${streak}<span style="font-size:10px;">天</span></div>
+      <div class="stat-label">连续专注</div>
+    </div>
+    <div class="stat-card">
+      <div class="stat-value accent" style="font-size:16px;">${avgMin}<span style="font-size:10px;">分</span></div>
+      <div class="stat-label">平均时长</div>
+    </div>`;
+}
+
+function _renderInterruptReasons() {
+  const el = document.getElementById('stats-interrupts');
+  if (!el) return;
+  const allInts = allSessions.flatMap(s => (s.interruptions || []).filter(ir => ir.reason));
+  const reasonMap = {};
+  allInts.forEach(ir => { const r = ir.reason; reasonMap[r] = (reasonMap[r] || 0) + 1; });
+  const sorted = Object.entries(reasonMap).sort((a,b) => b[1] - a[1]).slice(0, 4);
+
+  if (sorted.length === 0) {
+    el.innerHTML = '';
+    return;
+  }
+
+  const emojiMap = { '回': '📱', '消息': '📱', '刷': '📱', '微信': '📱', '微博': '📱', '视频': '📱',
+    '困': '😴', '睡': '😴', '休息': '😴', '累': '😴',
+    '查': '🔍', '资料': '🔍', '走神': '🔍',
+    '紧急': '🚨', '会议': '🚨', '电话': '📞' };
+  function pickEmoji(text) {
+    for (const [k, v] of Object.entries(emojiMap)) { if (text.includes(k)) return v; }
+    return '💭';
+  }
+
+  el.innerHTML = `
+    <div class="wc-head"><h4>打断原因 Top ${sorted.length}</h4></div>
+    ${sorted.map(([reason, count]) => `
+      <div class="int-reason-row">
+        <span class="ir-emoji">${pickEmoji(reason)}</span>
+        <span class="ir-text">${escHtml(reason)}</span>
+        <span class="ir-count">${count}次</span>
+      </div>`).join('')}`;
+}
+
+function _renderBestSlot() {
+  const el = document.getElementById('stats-best-slot');
+  if (!el) return;
+  // Find best hour block from completed sessions
+  const slots = {};
+  const completed = allSessions.filter(s => s.status === 'completed' && s.interruptions.length === 0);
+  completed.forEach(s => {
+    const d = new Date(s.date);
+    const hour = d.getHours();
+    const slot = hour < 12 ? '上午 ' + hour + ':00–' + (hour+1) + ':00'
+      : hour < 18 ? '下午 ' + (hour-12) + ':00–' + (hour-11) + ':00'
+      : '晚上 ' + (hour-12) + ':00–' + (hour-11) + ':00';
+    slots[slot] = (slots[slot] || 0) + 1;
+  });
+  const best = Object.entries(slots).sort((a,b) => b[1] - a[1])[0];
+
+  if (!best) {
+    el.innerHTML = '';
+    return;
+  }
+
+  const hourEmoji = best[0].includes('上午') ? '🌅' : best[0].includes('下午') ? '☀️' : '🌙';
+
+  el.innerHTML = `
+    <span class="bs-emoji">${hourEmoji}</span>
+    <div>
+      <div class="bs-title">最佳专注时段</div>
+      <div class="bs-time">${best[0]}</div>
+      <div class="bs-detail">${best[1]} 次完美专注 · 无中断记录</div>
+    </div>`;
+}
+
+/* ── Helpers ── */
+function isToday(d) {
+  const now = new Date();
+  return d.getFullYear() === now.getFullYear() && d.getMonth() === now.getMonth() && d.getDate() === now.getDate();
+}
+function isYesterday(d) {
+  const y = new Date(); y.setDate(y.getDate() - 1);
+  return d.getFullYear() === y.getFullYear() && d.getMonth() === y.getMonth() && d.getDate() === y.getDate();
+}
+function fmtDate(d) { return `${d.getMonth()+1}月${d.getDate()}日`; }
+function fmtTime(d) {
+  const h = String(d.getHours()).padStart(2,'0');
+  const m = String(d.getMinutes()).padStart(2,'0');
+  return `${h}:${m}`;
+}
+function escHtml(s) {
+  if (!s) return '';
+  const div = document.createElement('div');
+  div.textContent = s;
+  return div.innerHTML;
+}
+function taskIcon(task) {
+  const t = (task || '').toLowerCase();
+  if (/写|论文|paper|write|introduction/i.test(t)) return '📝';
+  if (/代码|code|重构|refactor|debug|程序/i.test(t)) return '💻';
+  if (/读|read|书|book|文献/i.test(t)) return '📖';
+  if (/ppt|汇报|slide|presentation/i.test(t)) return '📊';
+  if (/学|study|learn|课程/i.test(t)) return '📚';
+  if (/设计|design|画|draw/i.test(t)) return '🎨';
+  return '🎯';
 }
 
 /* ════════════════════════════════════════════════
@@ -1108,5 +1336,7 @@ function init() {
   buildCardPreviews();
   startMorphLoop();
   overlayLoop();
+  // Load history from storage
+  loadHistory();
 }
 window.addEventListener('load', init);

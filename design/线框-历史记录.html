@@ -1,0 +1,847 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>挽留者 · 历史记录 — 线框原型</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      background: #0a0a12;
+      font-family: 'Inter', 'Noto Sans SC', system-ui, sans-serif;
+      color: #e2e4e9;
+      display: flex;
+      justify-content: center;
+      padding: 40px 20px 80px;
+    }
+    .canvas {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    /* ── 标题区 ── */
+    .proto-header {
+      text-align: center;
+      margin-bottom: 48px;
+    }
+    .proto-header .badge {
+      display: inline-block;
+      background: rgba(124, 58, 237, 0.15);
+      color: #a78bfa;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      padding: 5px 14px;
+      border-radius: 20px;
+      border: 1px solid rgba(124, 58, 237, 0.2);
+      margin-bottom: 16px;
+    }
+    .proto-header h1 {
+      font-size: 28px;
+      font-weight: 600;
+      letter-spacing: -0.02em;
+      color: #f0f0f5;
+    }
+    .proto-header p {
+      font-size: 14px;
+      color: #8a8f98;
+      margin-top: 8px;
+    }
+
+    /* ── 手机外框 ── */
+    .phone-wrap {
+      display: flex;
+      gap: 48px;
+      justify-content: center;
+      flex-wrap: wrap;
+    }
+    .phone {
+      width: 390px;
+      flex-shrink: 0;
+      background: #0f0f18;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 36px;
+      padding: 10px;
+      box-shadow: 0 0 0 1px rgba(255,255,255,0.03), 0 40px 80px rgba(0,0,0,0.5);
+    }
+    .phone-screen {
+      background: #0d0d16;
+      border-radius: 28px;
+      overflow: hidden;
+      min-height: 700px;
+      position: relative;
+    }
+    .phone-label {
+      text-align: center;
+      font-size: 11px;
+      font-weight: 600;
+      color: #62666d;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      margin-top: 18px;
+    }
+
+    /* ── Dynamic Island ── */
+    .island {
+      width: 100px; height: 28px;
+      background: #0a0a12;
+      border-radius: 20px;
+      margin: 8px auto 6px;
+    }
+    .statusbar {
+      display: flex; justify-content: space-between;
+      padding: 0 22px;
+      font-size: 11px; font-weight: 600; color: #bbb;
+      margin-bottom: 6px;
+    }
+
+    /* ── 屏幕容器 ── */
+    .screen {
+      padding: 0 18px 20px;
+    }
+
+    /* ── 顶部摘要卡片 ── */
+    .summary-row {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+    .stat-card {
+      flex: 1;
+      background: rgba(255,255,255,0.03);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 14px 12px;
+      text-align: center;
+    }
+    .stat-card .stat-value {
+      font-size: 22px;
+      font-weight: 600;
+      color: #f0f0f5;
+      letter-spacing: -0.02em;
+      line-height: 1;
+      margin-bottom: 5px;
+    }
+    .stat-card .stat-value.accent { color: #a78bfa; }
+    .stat-card .stat-value.good { color: #34d399; }
+    .stat-card .stat-label {
+      font-size: 10px;
+      color: #62666d;
+      font-weight: 500;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    /* ── 时间线标题 ── */
+    .section-head {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 14px;
+      margin-top: 4px;
+    }
+    .section-head h3 {
+      font-size: 14px;
+      font-weight: 600;
+      color: #c0c4cc;
+      letter-spacing: -0.01em;
+    }
+    .filter-pills {
+      display: flex; gap: 6px;
+    }
+    .filter-pill {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.04em;
+      padding: 4px 10px;
+      border-radius: 20px;
+      color: #62666d;
+      border: 1px solid rgba(255,255,255,0.06);
+      background: transparent;
+    }
+    .filter-pill.active {
+      color: #a78bfa;
+      border-color: rgba(124,58,237,0.3);
+      background: rgba(124,58,237,0.08);
+    }
+
+    /* ── 历史条目 ── */
+    .history-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 10px;
+      position: relative;
+      overflow: hidden;
+    }
+    .history-card::before {
+      content: '';
+      position: absolute; left: 0; top: 0; bottom: 0;
+      width: 3px;
+    }
+    .history-card.completed::before { background: #34d399; }
+    .history-card.interrupted::before { background: #f59e0b; }
+    .history-card.abandoned::before { background: #6b7280; }
+
+    .hc-top {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+    .hc-date {
+      font-size: 11px;
+      color: #62666d;
+      font-weight: 500;
+      letter-spacing: 0.03em;
+    }
+    .hc-status {
+      font-size: 10px;
+      font-weight: 600;
+      letter-spacing: 0.05em;
+      padding: 3px 9px;
+      border-radius: 10px;
+    }
+    .hc-status.done { background: rgba(52,211,153,0.1); color: #34d399; }
+    .hc-status.partial { background: rgba(245,158,11,0.1); color: #f59e0b; }
+    .hc-status.gaveup { background: rgba(107,114,128,0.1); color: #8a8f98; }
+
+    .hc-body {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .hc-icon {
+      width: 36px; height: 36px;
+      border-radius: 10px;
+      background: rgba(124,58,237,0.08);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 14px; color: #a78bfa;
+      flex-shrink: 0;
+    }
+    .hc-info { flex: 1; min-width: 0; }
+    .hc-task {
+      font-size: 14px; font-weight: 600; color: #e2e4e9;
+      margin-bottom: 2px;
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+    .hc-meta {
+      font-size: 11px; color: #62666d;
+      display: flex; gap: 12px; flex-wrap: wrap;
+    }
+    .hc-meta span { display: flex; align-items: center; gap: 4px; }
+    .hc-meta .dot { width: 5px; height: 5px; border-radius: 50%; display: inline-block; }
+    .hc-meta .dot.comp { background: #a78bfa; }
+
+    .hc-duration {
+      font-size: 21px; font-weight: 600;
+      color: #f0f0f5;
+      font-family: 'Inter', monospace;
+      letter-spacing: -0.03em;
+      text-align: right;
+      flex-shrink: 0;
+      line-height: 1;
+    }
+    .hc-duration small {
+      display: block; font-size: 9px; font-weight: 400;
+      color: #62666d; letter-spacing: 0.03em; margin-top: 2px;
+    }
+
+    /* ── 打断记录子项 ── */
+    .interruptions {
+      margin-top: 12px;
+      border-top: 1px solid rgba(255,255,255,0.04);
+      padding-top: 10px;
+    }
+    .interruptions .label {
+      font-size: 10px; color: #8a8f98; margin-bottom: 8px;
+      font-weight: 500; letter-spacing: 0.04em;
+    }
+    .int-entry {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11px; color: #8a8f98;
+      margin-bottom: 5px;
+    }
+    .int-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%; background: #f59e0b;
+      flex-shrink: 0;
+    }
+    .int-reason {
+      flex: 1;
+      overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .int-outcome {
+      font-size: 10px; color: #62666d;
+      font-weight: 500; flex-shrink: 0;
+    }
+    .int-outcome.returned { color: #34d399; }
+    .int-outcome.left { color: #6b7280; }
+
+    /* ── 第二屏：周视图 ── */
+    .week-chart {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: 14px;
+      padding: 16px;
+      margin-bottom: 18px;
+    }
+    .week-header {
+      display: flex; justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+    .week-header h4 { font-size: 13px; font-weight: 600; color: #c0c4cc; }
+    .week-header .total { font-size: 13px; font-weight: 600; color: #a78bfa; }
+
+    .bar-row {
+      display: flex; align-items: flex-end;
+      gap: 8px; height: 110px;
+      margin-bottom: 8px;
+    }
+    .bar-col {
+      flex: 1; display: flex;
+      flex-direction: column; align-items: center; gap: 6px;
+    }
+    .bar-col .bar-stack {
+      width: 100%;
+      display: flex; flex-direction: column-reverse;
+      gap: 2px;
+    }
+    .bar-col .bar-seg {
+      width: 100%;
+      border-radius: 3px 3px 1px 1px;
+    }
+    .bar-col .bar-seg.focus { background: rgba(124,58,237,0.6); }
+    .bar-col .bar-seg.interrupt { background: rgba(245,158,11,0.4); }
+    .bar-col .bar-label {
+      font-size: 10px; color: #62666d; font-weight: 500;
+    }
+    .bar-legend {
+      display: flex; gap: 16px; margin-top: 10px;
+      font-size: 10px; color: #62666d;
+    }
+    .bar-legend span { display: flex; align-items: center; gap: 5px; }
+    .bar-legend .swatch {
+      width: 9px; height: 9px; border-radius: 2px; display: inline-block;
+    }
+
+    /* ── 注释标注 ── */
+    .annotations {
+      margin-top: 32px;
+      background: rgba(124,58,237,0.04);
+      border: 1px dashed rgba(124,58,237,0.2);
+      border-radius: 14px;
+      padding: 20px 22px;
+    }
+    .annotations h3 {
+      font-size: 13px; font-weight: 600; color: #a78bfa;
+      margin-bottom: 14px; letter-spacing: 0.02em;
+    }
+    .anno-item {
+      display: flex; align-items: flex-start; gap: 10px;
+      margin-bottom: 10px; font-size: 12px; color: #8a8f98; line-height: 1.6;
+    }
+    .anno-num {
+      width: 18px; height: 18px; border-radius: 50%;
+      background: rgba(124,58,237,0.12);
+      color: #a78bfa; font-size: 10px; font-weight: 700;
+      display: flex; align-items: center; justify-content: center;
+      flex-shrink: 0; margin-top: 1px;
+    }
+    .anno-item strong { color: #c0c4cc; font-weight: 600; }
+
+    /* ── 设计决策面板 ── */
+    .design-notes {
+      margin-top: 28px;
+    }
+    .design-notes h3 {
+      font-size: 14px; font-weight: 600; color: #c0c4cc;
+      margin-bottom: 12px;
+    }
+    .dn-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      gap: 10px;
+    }
+    .dn-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.04);
+      border-radius: 12px;
+      padding: 14px;
+      font-size: 12px; color: #8a8f98; line-height: 1.6;
+    }
+    .dn-card .dn-tag {
+      display: inline-block;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: 0.06em;
+      text-transform: uppercase;
+      padding: 2px 7px; border-radius: 8px;
+      margin-bottom: 8px;
+    }
+    .dn-tag.linear { background: rgba(94,106,210,0.12); color: #828fff; }
+    .dn-tag.notion { background: rgba(0,117,222,0.12); color: #62aef0; }
+    .dn-tag.superhuman { background: rgba(203,183,251,0.12); color: #cbb7fb; }
+
+    hr.divider {
+      border: none; border-top: 1px solid rgba(255,255,255,0.04);
+      margin: 32px 0;
+    }
+  </style>
+</head>
+<body>
+<div class="canvas">
+
+  <!-- ═══════════════════════ 标题 ═══════════════════════ -->
+  <div class="proto-header">
+    <div class="badge">Wireframe · 历史行为记录</div>
+    <h1>挽留者 — 历史记录模块</h1>
+    <p>参照 Linear · Notion · Superhuman 设计语言 | 信息架构原型</p>
+  </div>
+
+  <!-- ═══════════════════════ 双屏对比 ═══════════════════════ -->
+  <div class="phone-wrap">
+
+    <!-- ── 屏幕 A：历史列表（主视图）── -->
+    <div style="text-align:center;">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="island"></div>
+          <div class="statusbar">
+            <span>9:41</span>
+            <span style="display:flex;gap:4px;">
+              <span style="font-size:11px;">📶</span>
+              <span style="font-size:11px;">📡</span>
+              <span style="font-size:11px;">🔋</span>
+            </span>
+          </div>
+
+          <div class="screen">
+            <!-- ── 顶栏 ── -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+              <h2 style="font-size:20px;font-weight:600;color:#f0f0f5;letter-spacing:-0.02em;">专注记录</h2>
+              <div style="width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,0.03);border:1px solid rgba(255,255,255,0.06);display:flex;align-items:center;justify-content:center;font-size:14px;color:#a78bfa;">📅</div>
+            </div>
+
+            <!-- ── 摘要卡片 ── -->
+            <div class="summary-row">
+              <div class="stat-card">
+                <div class="stat-value accent">128<span style="font-size:12px;font-weight:400;">分</span></div>
+                <div class="stat-label">今日专注</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value">3<span style="font-size:12px;font-weight:400;">次</span></div>
+                <div class="stat-label">今日会话</div>
+              </div>
+              <div class="stat-card">
+                <div class="stat-value good">85<span style="font-size:12px;font-weight:400;">%</span></div>
+                <div class="stat-label">完成率</div>
+              </div>
+            </div>
+
+            <!-- ── 筛选 ── -->
+            <div class="section-head">
+              <h3>全部记录</h3>
+              <div class="filter-pills">
+                <span class="filter-pill active">全部</span>
+                <span class="filter-pill">已完成</span>
+                <span class="filter-pill">有打断</span>
+              </div>
+            </div>
+
+            <!-- ── 历史卡片 ①：已完成 ── -->
+            <div class="history-card completed">
+              <div class="hc-top">
+                <span class="hc-date">今天 · 14:30 – 15:20</span>
+                <span class="hc-status done">已完成</span>
+              </div>
+              <div class="hc-body">
+                <div class="hc-icon">📝</div>
+                <div class="hc-info">
+                  <div class="hc-task">写论文 introduction</div>
+                  <div class="hc-meta">
+                    <span><span class="dot comp"></span> 乔布斯</span>
+                    <span>雨夜主题</span>
+                  </div>
+                </div>
+                <div class="hc-duration">
+                  50<small>分钟</small>
+                </div>
+              </div>
+              <!-- 无打断 -->
+            </div>
+
+            <!-- ── 历史卡片 ②：有打断但完成 ── -->
+            <div class="history-card completed">
+              <div class="hc-top">
+                <span class="hc-date">今天 · 10:00 – 10:55</span>
+                <span class="hc-status done">已完成</span>
+              </div>
+              <div class="hc-body">
+                <div class="hc-icon">💻</div>
+                <div class="hc-info">
+                  <div class="hc-task">代码重构 · 数据层抽象</div>
+                  <div class="hc-meta">
+                    <span><span class="dot comp"></span> 芒格</span>
+                    <span>图书馆主题</span>
+                  </div>
+                </div>
+                <div class="hc-duration">
+                  45<small>分钟</small>
+                </div>
+              </div>
+              <div class="interruptions">
+                <div class="label">⚠️ 打断记录 · 1 次</div>
+                <div class="int-entry">
+                  <span class="int-dot"></span>
+                  <span class="int-reason">想刷一下微博</span>
+                  <span class="int-outcome returned">→ 冷静后返回</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── 历史卡片 ③：被打断后放弃 ── -->
+            <div class="history-card interrupted">
+              <div class="hc-top">
+                <span class="hc-date">昨天 · 16:00 – 16:23</span>
+                <span class="hc-status partial">提前结束</span>
+              </div>
+              <div class="hc-body">
+                <div class="hc-icon">📖</div>
+                <div class="hc-info">
+                  <div class="hc-task">读论文 · Section 3</div>
+                  <div class="hc-meta">
+                    <span><span class="dot comp"></span> 费曼</span>
+                    <span>森林主题</span>
+                  </div>
+                </div>
+                <div class="hc-duration" style="color:#f59e0b;">
+                  23<small>分钟</small>
+                </div>
+              </div>
+              <div class="interruptions">
+                <div class="label">⚠️ 打断记录 · 2 次</div>
+                <div class="int-entry">
+                  <span class="int-dot"></span>
+                  <span class="int-reason">回微信消息</span>
+                  <span class="int-outcome returned">→ 返回继续</span>
+                </div>
+                <div class="int-entry">
+                  <span class="int-dot"></span>
+                  <span class="int-reason">实在太困了想睡</span>
+                  <span class="int-outcome left">→ 10分钟后离开</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── 历史卡片 ④：放弃 ── -->
+            <div class="history-card abandoned">
+              <div class="hc-top">
+                <span class="hc-date">6月1日 · 09:00 – 09:08</span>
+                <span class="hc-status gaveup">已放弃</span>
+              </div>
+              <div class="hc-body">
+                <div class="hc-icon" style="background:rgba(107,114,128,0.08);color:#8a8f98;">📊</div>
+                <div class="hc-info">
+                  <div class="hc-task" style="color:#8a8f98;">做 PPT 汇报</div>
+                  <div class="hc-meta">
+                    <span>独自专注</span>
+                    <span>赛博桌面</span>
+                  </div>
+                </div>
+                <div class="hc-duration" style="color:#6b7280;">
+                  8<small>分钟</small>
+                </div>
+              </div>
+              <div class="interruptions">
+                <div class="label">⚠️ 打断记录 · 1 次</div>
+                <div class="int-entry">
+                  <span class="int-dot"></span>
+                  <span class="int-reason">紧急会议通知</span>
+                  <span class="int-outcome left">→ 紧急退出</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── "查看更多" ── -->
+            <div style="text-align:center;padding:12px;font-size:12px;color:#8a8f98;cursor:default;">
+              加载更多 · 共 24 条记录
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">屏幕 A · 历史列表</div>
+    </div>
+
+    <!-- ── 屏幕 B：周视图 / 统计 ── -->
+    <div style="text-align:center;">
+      <div class="phone">
+        <div class="phone-screen">
+          <div class="island"></div>
+          <div class="statusbar">
+            <span>9:41</span>
+            <span style="display:flex;gap:4px;">
+              <span style="font-size:11px;">📶</span><span style="font-size:11px;">📡</span><span style="font-size:11px;">🔋</span>
+            </span>
+          </div>
+
+          <div class="screen">
+            <!-- ── 顶栏 ── -->
+            <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px;">
+              <div style="display:flex;align-items:center;gap:8px;">
+                <span style="font-size:18px;color:#a7858f;">←</span>
+                <h2 style="font-size:20px;font-weight:600;color:#f0f0f5;letter-spacing:-0.02em;">本周统计</h2>
+              </div>
+              <span style="font-size:11px;color:#62666d;font-weight:500;">6/1–6/7</span>
+            </div>
+
+            <!-- ── 周柱状图 ── -->
+            <div class="week-chart">
+              <div class="week-header">
+                <h4>每日专注时长</h4>
+                <span class="total">总计 8.5h</span>
+              </div>
+              <div class="bar-row">
+                <!-- 周一 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:72px;"></div>
+                    <div class="bar-seg interrupt" style="height:10px;"></div>
+                  </div>
+                  <span class="bar-label">一</span>
+                </div>
+                <!-- 周二 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:94px;"></div>
+                  </div>
+                  <span class="bar-label" style="color:#a78bfa;font-weight:600;">二</span>
+                </div>
+                <!-- 周三 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:56px;"></div>
+                    <div class="bar-seg interrupt" style="height:28px;"></div>
+                  </div>
+                  <span class="bar-label">三</span>
+                </div>
+                <!-- 周四 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:88px;"></div>
+                  </div>
+                  <span class="bar-label">四</span>
+                </div>
+                <!-- 周五 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:62px;"></div>
+                    <div class="bar-seg interrupt" style="height:14px;"></div>
+                  </div>
+                  <span class="bar-label">五</span>
+                </div>
+                <!-- 周六 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:30px;"></div>
+                  </div>
+                  <span class="bar-label">六</span>
+                </div>
+                <!-- 周日 -->
+                <div class="bar-col">
+                  <div class="bar-stack">
+                    <div class="bar-seg focus" style="height:15px;"></div>
+                    <div class="bar-seg interrupt" style="height:20px;"></div>
+                  </div>
+                  <span class="bar-label">日</span>
+                </div>
+              </div>
+              <div class="bar-legend">
+                <span><span class="swatch" style="background:rgba(124,58,237,0.6);"></span> 专注</span>
+                <span><span class="swatch" style="background:rgba(245,158,11,0.4);"></span> 打断</span>
+              </div>
+            </div>
+
+            <!-- ── 趋势卡片 ── -->
+            <div style="display:flex;gap:8px;margin-bottom:14px;">
+              <div class="stat-card" style="flex:1;">
+                <div class="stat-value good" style="font-size:18px;">↑ 12%</div>
+                <div class="stat-label">vs 上周</div>
+              </div>
+              <div class="stat-card" style="flex:1;">
+                <div class="stat-value" style="font-size:18px;">5<span style="font-size:10px;">天</span></div>
+                <div class="stat-label">连续专注</div>
+              </div>
+              <div class="stat-card" style="flex:1;">
+                <div class="stat-value accent" style="font-size:18px;">42<span style="font-size:10px;">分</span></div>
+                <div class="stat-label">平均时长</div>
+              </div>
+            </div>
+
+            <!-- ── 打断原因分布 ── -->
+            <div class="week-chart" style="margin-bottom:12px;">
+              <div class="week-header">
+                <h4>打断原因 Top 3</h4>
+              </div>
+              <div style="display:flex;flex-direction:column;gap:8px;">
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:18px;">📱</span>
+                  <span style="flex:1;font-size:12px;color:#c0c4cc;">回消息 / 刷社交</span>
+                  <span style="font-size:12px;color:#f59e0b;font-weight:600;">4次</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:18px;">😴</span>
+                  <span style="flex:1;font-size:12px;color:#c0c4cc;">困了 / 想休息</span>
+                  <span style="font-size:12px;color:#f59e0b;font-weight:600;">2次</span>
+                </div>
+                <div style="display:flex;align-items:center;gap:10px;">
+                  <span style="font-size:18px;">🔍</span>
+                  <span style="flex:1;font-size:12px;color:#c0c4cc;">查资料走神</span>
+                  <span style="font-size:12px;color:#f59e0b;font-weight:600;">1次</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- ── 最佳时段 ── -->
+            <div style="background:rgba(52,211,153,0.04);border:1px solid rgba(52,211,153,0.12);border-radius:14px;padding:14px;display:flex;align-items:center;gap:12px;">
+              <span style="font-size:24px;">🌅</span>
+              <div>
+                <div style="font-size:12px;font-weight:600;color:#34d399;margin-bottom:2px;">最佳专注时段</div>
+                <div style="font-size:13px;color:#c0c4cc;">上午 10:00 – 11:30</div>
+                <div style="font-size:11px;color:#62666d;">平均完成率 92% · 最少打断</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="phone-label">屏幕 B · 周统计视图</div>
+    </div>
+
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ═══════════════════════ 设计标注 ═══════════════════════ -->
+  <div class="annotations">
+    <h3>📐 信息架构标注</h3>
+
+    <div class="anno-item">
+      <span class="anno-num">1</span>
+      <div>
+        <strong>顶部摘要栏（3 卡片）</strong><br />
+        参照 Superhuman 的克制数据展示——只有 3 个关键指标（今日专注 / 会话数 / 完成率），不堆砌数字。卡片背景极暗（rgba white 0.03），与焦点计时界面保持视觉一致性。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">2</span>
+      <div>
+        <strong>左侧色条 + 状态标签 的层级编码</strong><br />
+        参照 Linear 的色条系统——绿色=完成、琥珀=打断、灰色=放弃。色条仅在卡片左侧出现 (3px)，极简不抢眼，扫视时一眼可辨。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">3</span>
+      <div>
+        <strong>时间线卡片结构</strong><br />
+        参照 Notion 的温暖卡片——每张卡片包含：日期时间 / 任务名 / 时长 / 陪伴者 / 主题 / 打断折叠区。打断记录作为可展开子区域，默认收起避免视觉噪音。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">4</span>
+      <div>
+        <strong>打断子条目</strong><br />
+        每条打断记录包含：具体原因文本 + 结局（返回 vs 离开），黄色圆点标记。用户可以看到自己每次"想逃"的原因和最终选择，形成自我认知闭环。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">5</span>
+      <div>
+        <strong>筛选胶囊（全部 / 已完成 / 有打断）</strong><br />
+        参照 Linear 的 pill 组件——极简边框、小字号、单色高亮。让用户快速定位到想看的记录类型。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">6</span>
+      <div>
+        <strong>周视图 · 堆叠柱状图</strong><br />
+        每天一个柱状条，紫色=专注时长、琥珀色=打断时长。直观展示"有效专注"与"打断损耗"的比例关系。底部标注对比上周趋势和最佳时段推荐。
+      </div>
+    </div>
+
+    <div class="anno-item">
+      <span class="anno-num">7</span>
+      <div>
+        <strong>打断原因 Top 3 + 最佳时段建议</strong><br />
+        将"打断原因"数据聚合展示，让用户看到自己的打断模式（如：总是因为回消息而打断）。最佳时段基于历史数据自动推荐。
+      </div>
+    </div>
+  </div>
+
+  <hr class="divider" />
+
+  <!-- ═══════════════════════ 设计决策 ═══════════════════════ -->
+  <div class="design-notes">
+    <h3>🎨 设计决策 · 借鉴来源</h3>
+    <div class="dn-grid">
+
+      <div class="dn-card">
+        <span class="dn-tag linear">Linear</span>
+        <div>
+          <strong>暗色层级系统</strong><br />
+          卡片背景 rgba white 0.02–0.05，色条编码状态。极低对比度边框分割，让数据在黑暗中有序浮现。
+        </div>
+      </div>
+
+      <div class="dn-card">
+        <span class="dn-tag linear">Linear</span>
+        <div>
+          <strong>筛选 Pill 组件</strong><br />
+          ghost border + 极小字号 (10px) + weight 600。激活态使用品牌紫而非强对比色。信息密度高但不压抑。
+        </div>
+      </div>
+
+      <div class="dn-card">
+        <span class="dn-tag notion">Notion</span>
+        <div>
+          <strong>温暖卡片氛围</strong><br />
+          即使暗色主题，也通过微妙圆角 (14px) 和宽松内边距营造"纸质感"。每张卡片是独立信息单元，不堆叠。
+        </div>
+      </div>
+
+      <div class="dn-card">
+        <span class="dn-tag notion">Notion</span>
+        <div>
+          <strong>数据摘要卡片</strong><br />
+          顶部 3 卡片摘要模式——大数字 + 极小标签。Notion 的 metric cards 模式：先给结论，再展开细节。
+        </div>
+      </div>
+
+      <div class="dn-card">
+        <span class="dn-tag superhuman">Superhuman</span>
+        <div>
+          <strong>克制配色</strong><br />
+          只用 3 种强调色：紫色（品牌/专注）、琥珀（打断/警告）、翠绿（完成/正面）。没有多余的语义色，保持克制。
+        </div>
+      </div>
+
+      <div class="dn-card">
+        <span class="dn-tag superhuman">Superhuman</span>
+        <div>
+          <strong>留白自信</strong><br />
+          不塞满信息。即使历史列表，每张卡片之间也有清晰的呼吸感。Superhuman 的 luxury minimalism：少即是多。
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>
+</body>
+</html>
