@@ -14,6 +14,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.ttime.wanliu.ui.theme.*
@@ -24,10 +25,10 @@ data class DurationOption(
 )
 
 val DurationOptions = listOf(
-    DurationOption(25, "25 分\n钟"),
-    DurationOption(50, "50 分\n钟"),
-    DurationOption(90, "90 分\n钟"),
-    DurationOption(0, "自定\n义")
+    DurationOption(25, "25分钟"),
+    DurationOption(50, "50分钟"),
+    DurationOption(90, "90分钟"),
+    DurationOption(0, "自定义")
 )
 
 @Composable
@@ -52,10 +53,16 @@ fun DurationPill(
     ) {
         Text(
             text = option.label,
-            style = ControlTextStyle,
+            style = ControlTextStyle.copy(
+                fontSize = 13.sp,
+                lineHeight = 16.sp
+            ),
             color = textColor,
             fontWeight = FontWeight.SemiBold,
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            softWrap = false
         )
     }
 }

@@ -15,6 +15,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -22,13 +23,10 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
-import androidx.compose.ui.platform.LocalContext
 import com.ttime.wanliu.ui.theme.*
 
 data class ThemeInfo(
@@ -54,6 +52,13 @@ fun ThemeCard(
 ) {
     val borderColor = if (isSelected) PurplePrimary.copy(alpha = 0.95f) else Color.Transparent
     val borderWidth = if (isSelected) 1.5.dp else 0.dp
+    val context = LocalContext.current
+    val imageRequest = remember(context, theme.id) {
+        ImageRequest.Builder(context)
+            .data(themeImageUrl(theme.id, full = false))
+            .crossfade(true)
+            .build()
+    }
 
     Box(
         modifier = modifier
@@ -64,12 +69,21 @@ fun ThemeCard(
             .clickable(onClick = onClick),
         contentAlignment = Alignment.Center
     ) {
-        // 真实照片缩略图（对应原型的 .tc-img）
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            theme.bgColor.copy(alpha = 0.95f),
+                            theme.bgColor.copy(alpha = 0.62f),
+                            Color(0xFF070812)
+                        )
+                    )
+                )
+        )
         AsyncImage(
-            model = ImageRequest.Builder(LocalContext.current)
-                .data(themeImageUrl(theme.id, full = false))
-                .crossfade(true)
-                .build(),
+            model = imageRequest,
             contentDescription = theme.label,
             contentScale = ContentScale.Crop,
             modifier = Modifier.matchParentSize()

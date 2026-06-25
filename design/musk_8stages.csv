@@ -1,0 +1,17 @@
+﻿stage_index,name,chinese,english,context,tint_r,tint_g,tint_b
+0,初心,"唯一需要遵守的规则
+是物理定律",The only rules are the laws of physics. Everything else is a recommendation.,南非长大，12岁卖第一个游戏。自学编程和物理，如饥似渴地阅读,220,90,60
+1,原理,"先算渐近极限
+再问现实为什么差这么远",Boil things down to the most fundamental truths and reason up from there.,火箭原材料成本=售价2%→白痴指数50→SpaceX降成本10倍。从物理事实重建,210,65,45
+2,冒险,"前三枚火箭全炸了
+第四次成功了","Failure is an option here. If things are not failing, you are not innovating enough.",2006–2008 · 三次发射全败几乎破产。第四次成功获NASA合同,200,60,40
+3,垂直,"制造比设计难十倍
+所以必须自己做",Manufacturing is 10x harder than designing.,SpaceX自制85%零件，Tesla自建电池工厂。垂直整合不是策略偏好是物理必然,215,70,48
+4,算法,"先质疑需求是否该存在
+再删除，最后才加速","If you're not adding back at least 10%, you're not deleting enough.",五步算法：1质疑→2删除→3简化→4加速→5自动化。顺序不可颠倒,190,55,38
+5,地狱,"产能地狱里我睡工厂
+亲自解决最关键瓶颈",I slept on the factory floor to show the team I was in the trenches with them.,2018 · Model 3产能地狱。拆掉自动化产线重来。CEO到场制造信号,205,62,42
+6,火星,"成为多行星物种
+是对人类文明的责任",You want to wake up and think the future is going to be great.,Starship完全可复用火箭。不是「想不想去火星」，是「不去火星人类会灭绝」,225,85,55
+7,前行,"我说的一些事情会是错的
+但这不应该是你不行动的理由",Some things I say will be incorrect and should be corrected.,1971– · SpaceX+Tesla+xAI+X。物理定律是唯一硬约束，其他都是建议,210,65,45

@@ -9,6 +9,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
@@ -663,8 +664,11 @@ fun CompanionStage(
     val currentForm = forms[formIndex]
     val nextForm = forms[(formIndex + 1) % stageCount]
 
+    val nextIndex = (formIndex + 1) % stageCount
     val capName = if (stages != null) "${companion.name} · ${stages[formIndex].name}" else companion.name
     val capQuote = if (stages != null) stages[formIndex].chinese else companion.quote
+    val nextCapName = if (stages != null) "${companion.name} · ${stages[nextIndex].name}" else companion.name
+    val nextCapQuote = if (stages != null) stages[nextIndex].chinese else companion.quote
 
     Column(
         modifier = modifier.fillMaxSize(),
@@ -746,38 +750,62 @@ fun CompanionStage(
             }
         }
 
-        // 名字 + 金句 —— 对齐原型 .companion-cap
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(bottom = 6.dp, top = 4.dp)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(58.dp)
+                .padding(bottom = 6.dp, top = 4.dp),
+            contentAlignment = Alignment.Center
         ) {
-            // 「<b>名字</b> 正在陪你专注」：名字固定青色 rgba(125,211,252,.92) + 600，
-            // 说明文字偏白 rgba(214,232,255,.6)。同一行两种颜色。
-            Text(
-                text = buildAnnotatedString {
-                    withStyle(SpanStyle(
-                        color = Color(125, 211, 252).copy(alpha = 0.92f),
-                        fontWeight = FontWeight.SemiBold
-                    )) { append(capName) }
-                    withStyle(SpanStyle(color = Color(214, 232, 255).copy(alpha = 0.6f))) {
-                        append(" 正在陪你专注")
-                    }
-                },
-                fontSize = 11.sp,
-                letterSpacing = 0.04.em,
-                textAlign = TextAlign.Center
+            CompanionCaption(
+                name = capName,
+                quote = capQuote,
+                modifier = Modifier.alpha(1f - morphCoef)
             )
-            // 金句：italic，rgba(214,232,255,.34)，10px，line-height 1.55，margin-top 4px
-            Text(
-                text = capQuote,
-                color = Color(214, 232, 255).copy(alpha = 0.34f),
-                fontStyle = FontStyle.Italic,
-                fontSize = 10.sp,
-                lineHeight = 15.5.sp,
-                textAlign = TextAlign.Center,
-                modifier = Modifier.padding(top = 4.dp)
+            CompanionCaption(
+                name = nextCapName,
+                quote = nextCapQuote,
+                modifier = Modifier.alpha(morphCoef)
             )
         }
+    }
+}
+
+@Composable
+private fun CompanionCaption(
+    name: String,
+    quote: String,
+    modifier: Modifier = Modifier
+) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier.fillMaxWidth()
+    ) {
+        Text(
+            text = buildAnnotatedString {
+                withStyle(
+                    SpanStyle(
+                        color = Color(125, 211, 252).copy(alpha = 0.92f),
+                        fontWeight = FontWeight.SemiBold
+                    )
+                ) { append(name) }
+                withStyle(SpanStyle(color = Color(214, 232, 255).copy(alpha = 0.6f))) {
+                    append(" 正在陪你专注")
+                }
+            },
+            fontSize = 11.sp,
+            letterSpacing = 0.04.em,
+            textAlign = TextAlign.Center
+        )
+        Text(
+            text = quote,
+            color = Color(214, 232, 255).copy(alpha = 0.34f),
+            fontStyle = FontStyle.Italic,
+            fontSize = 10.sp,
+            lineHeight = 15.5.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.padding(top = 4.dp)
+        )
     }
 }
 

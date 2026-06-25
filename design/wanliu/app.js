@@ -410,6 +410,114 @@ const MUNGER_STAGES = [
   { name:'传承', chinese:'获取智慧是一种道德责任\n不传下去就是浪费', english:'Acquiring wisdom is a moral duty.', context:'1924–2023 · 99岁离世，一生践行终身学习。智慧必须传给下一代', tint:[230,210,220] },
 ];
 
+/* ── Feynman 8-Stage Narrative ── */
+const FEYNMAN_STAGES = [
+  { name:'初心', chinese:'好奇心是最好的老师\n不需要理由的探索', english:'The pleasure of finding things out.', context:'1918年生 · 皇后区 — 父亲教他观察自然而非背名字', tint:[185,215,225] },
+  { name:'质疑', chinese:'第一原则是不要欺骗自己\n而你是最容易上自己当的人', english:'The first principle is that you must not fool yourself.', context:'1974 · Cargo Cult Science — 有形式无实质的「科学」飞机不会降落', tint:[100,195,215] },
+  { name:'理解', chinese:'如果你不能向大一新生解释\n说明你自己还没真正理解', english:"If you can't explain it to a freshman, you don't really understand it.", context:'1961–63 · 费曼物理学讲义 — 拒绝术语堆砌，坚持用类比建立直觉', tint:[110,200,220] },
+  { name:'发现', chinese:'世界是一个动态的\n不断颤动的混乱之美', english:'The world is a dynamic mess of jiggling things.', context:'1948 · 量子电动力学 — 费曼图让粒子相互作用的抽象数学变成直观线条', tint:[80,185,210] },
+  { name:'教学', chinese:'知道名字\n不等于理解', english:'You can know the name of a bird in all languages and know nothing about the bird.', context:'巴西教学经历 — 学生能背公式但换个问法就不会。命名不是理解', tint:[90,195,215] },
+  { name:'挑战', chinese:'现实必须优先于公关\n因为自然不会被愚弄', english:'Reality must take precedence over public relations, for nature cannot be fooled.', context:'1986 · 挑战者号 — O型环冰水实验，30秒演示替代数百页报告', tint:[70,180,200] },
+  { name:'嬉戏', chinese:'不重要的事往往引向\n最重要的发现', english:"Physics is like sex: it may give practical results, but that's not why we do it.", context:'餐厅旋转盘子→诺贝尔奖。深度游戏不是散漫，是最高强度的投入', tint:[120,210,225] },
+  { name:'传承', chinese:'别在乎别人怎么想\n做最真实的自己', english:'What do you care what other people think?', context:'1918–1988 · Arline教会他的最后一课。命名≠理解，质疑≠否定', tint:[140,220,235] },
+];
+
+/* ── Taleb 8-Stage Narrative ── */
+const TALEB_STAGES = [
+  { name:'初心', chinese:'别跨过平均深度四英尺的河\n你会淹死', english:"Don't cross a river if it is four feet deep on average.", context:'黎巴嫩内战长大 — 战争教会他：你以为不会发生的事，一定会发生', tint:[210,180,120] },
+  { name:'黑天鹅', chinese:'历史不是爬行\n而是跳跃', english:'History does not crawl; it jumps.', context:'1987 · 黑色星期一 — 用深度虚值期权赚3500万，尾部风险才是唯一重要的风险', tint:[215,165,95] },
+  { name:'反脆弱', chinese:'风会熄灭蜡烛\n却能让火越烧越旺', english:'Wind extinguishes a candle and energizes a fire.', context:'2012 · 《反脆弱》— 不是抵抗混乱，是从混乱中获益。脆弱→鲁棒→反脆弱', tint:[200,155,85] },
+  { name:'杠铃', chinese:'极端保守加极端冒险\n中间地带最危险', english:'The middle is where you get crushed.', context:'90%极度安全+10%极端冒险。避开中等风险——那是隐性尾部风险的温床', tint:[220,170,100] },
+  { name:'皮肤', chinese:'别告诉我你怎么想\n告诉我你的投资组合', english:"Don't tell me what you think, tell me what's in your portfolio.", context:'汉谟拉比法典：建筑塌了处死建筑师。没有skin in the game的人天然制造脆弱性', tint:[195,150,90] },
+  { name:'知识', chinese:'专家预测了10次衰退\n0次是对的', english:'The calamity of the expert is that he predicts outside his pay grade.', context:'火鸡问题：被喂1000天的火鸡，每天强化世界很安全的信念。直到感恩节', tint:[185,145,80] },
+  { name:'减法', chinese:'改进不来自增加更多\n而来自去除有害的', english:'The solution is to reduce, not to add.', context:'Via Negativa — 停止吃有害的>增加超级食物。删掉弱句子>增加更多论证', tint:[200,160,95] },
+  { name:'传承', chinese:'活得久比说得对更重要\n活下来的人才有资格写历史', english:'My only measure of success is how much time you have to kill.', context:'1960– · 林迪效应：存在越久越可能继续存在。Just read Seneca.', tint:[210,175,110] },
+];
+
+/* ── Musk 8-Stage Narrative ── */
+const MUSK_STAGES = [
+  { name:'初心', chinese:'唯一需要遵守的规则\n是物理定律', english:'The only rules are the laws of physics. Everything else is a recommendation.', context:'南非长大，12岁卖第一个游戏。自学编程和物理，如饥似渴地阅读', tint:[220,90,60] },
+  { name:'原理', chinese:'先算渐近极限\n再问现实为什么差这么远', english:'Boil things down to the most fundamental truths and reason up from there.', context:'火箭原材料成本=售价2%→白痴指数50→SpaceX降成本10倍。从物理事实重建', tint:[210,65,45] },
+  { name:'冒险', chinese:'前三枚火箭全炸了\n第四次成功了', english:'Failure is an option here. If things are not failing, you are not innovating enough.', context:'2006–2008 · 三次发射全败几乎破产。第四次成功获NASA合同', tint:[200,60,40] },
+  { name:'垂直', chinese:'制造比设计难十倍\n所以必须自己做', english:'Manufacturing is 10x harder than designing.', context:'SpaceX自制85%零件，Tesla自建电池工厂。垂直整合不是策略偏好是物理必然', tint:[215,70,48] },
+  { name:'算法', chinese:'先质疑需求是否该存在\n再删除，最后才加速', english:"If you're not adding back at least 10%, you're not deleting enough.", context:'五步算法：1质疑→2删除→3简化→4加速→5自动化。顺序不可颠倒', tint:[190,55,38] },
+  { name:'地狱', chinese:'产能地狱里我睡工厂\n亲自解决最关键瓶颈', english:'I slept on the factory floor to show the team I was in the trenches with them.', context:'2018 · Model 3产能地狱。拆掉自动化产线重来。CEO到场制造信号', tint:[205,62,42] },
+  { name:'火星', chinese:'成为多行星物种\n是对人类文明的责任', english:'You want to wake up and think the future is going to be great.', context:'Starship完全可复用火箭。不是「想不想去火星」，是「不去火星人类会灭绝」', tint:[225,85,55] },
+  { name:'前行', chinese:'我说的一些事情会是错的\n但这不应该是你不行动的理由', english:'Some things I say will be incorrect and should be corrected.', context:'1971– · SpaceX+Tesla+xAI+X。物理定律是唯一硬约束，其他都是建议', tint:[210,65,45] },
+];
+
+/* ── Naval 8-Stage Narrative ── */
+const NAVAL_STAGES = [
+  { name:'初心', chinese:'贫穷不是缺少钱\n而是缺少选择的自由', english:"Poverty is not the lack of money; it's the lack of freedom.", context:'印度移民之子→达特茅斯→硅谷。从小就知道：自由比钱重要', tint:[190,170,130] },
+  { name:'杠杆', chinese:'代码和媒体\n是新时代的劳动力', english:'Code and media are permissionless leverage.', context:'劳动力需要许可，资本需要钱。代码和内容——你只需一台电脑和创造力', tint:[185,165,120] },
+  { name:'知识', chinese:'追求特定知识\n它会像玩一样自然', english:'Specific knowledge is found by pursuing your genuine curiosity.', context:'学校不教的、你做起来像玩的事。一旦找到，复利效应会改变一切', tint:[180,160,115] },
+  { name:'复利', chinese:'长期游戏里\n财富是耐心的函数', english:'Play long-term games with long-term people.', context:'一切复利：知识、关系、财富。短期不起眼的，长期是指数级的', tint:[195,170,125] },
+  { name:'判断', chinese:'智慧比勤奋稀缺\n方向比速度重要', english:'In an age of infinite leverage, judgment is the most important skill.', context:'有了杠杆之后，判断力就是一切。做对一件事>做一百件平庸的事', tint:[175,155,110] },
+  { name:'自由', chinese:'财富不是目的\n是拥有时间的自由', english:'Money is not the goal. The goal is to be free.', context:'真正的财富不是存款余额，而是你可以在任何时间做任何事的自由', tint:[190,168,122] },
+  { name:'幸福', chinese:'欲望是与自己签下的\n不快乐合同', english:'Desire is a contract you make with yourself to be unhappy until you get what you want.', context:'幸福不是拥有更多，而是欲望更少。内在状态的平静是最高级奢侈品', tint:[185,162,118] },
+  { name:'传承', chinese:'用特定知识加杠杆\n加上复利和判断力', english:'Seek wealth, not money or status. Wealth is assets that earn while you sleep.', context:'「如何不靠运气致富」— 38条推文凝聚一生智慧。找到你像玩一样的事', tint:[190,165,120] },
+];
+
+/* ── Paul Graham 8-Stage Narrative ── */
+const PG_STAGES = [
+  { name:'初心', chinese:'画家转码农\n发现编程也是艺术', english:"Hackers are makers. They're not scientists.", context:'康奈尔→哈佛CS博士→画家→Viaweb→Yahoo收购。画画和写代码是同一种冲动', tint:[150,170,190] },
+  { name:'写作', chinese:'随笔不是表达已有的想法\n而是发现真正的想法', english:'Essays are not a way to convey ideas, but to generate them.', context:'2001 · 开始写essays。写作不是输出是思考。一篇好essay来自一个你还没想通的问题', tint:[140,165,185] },
+  { name:'创业', chinese:'做不可规模化的事\n是早期创业核心', english:'The most common unscalable thing founders have to do is recruit users manually.', context:'YC诞生 — 一个一个手动拉用户不是笨办法，是不可或缺的学习阶段', tint:[135,160,180] },
+  { name:'品味', chinese:'好品味不是天赋\n是见过足够多好作品后的判断力', english:'Good taste can be cultivated and must be cultivated.', context:'审美疲劳是最好的老师。见过足够多好东西之后，差的东西会让你本能不适', tint:[145,170,188] },
+  { name:'坚持', chinese:'固执的正确\n看起来像是错误的错误', english:'The most successful founders are often the ones who seem most wrong at the time.', context:'市场不认可≠你错了。YC投资Airbnb时所有人都觉得疯了。反直觉是创新的入场券', tint:[130,155,175] },
+  { name:'创始人', chinese:'做人们想要的东西\n其他一切都会跟上', english:'Make something people want.', context:'YC的核心哲学浓缩为一句话。不是「做出完美产品」，是「做出人们抢着用的东西」', tint:[140,162,182] },
+  { name:'黑客', chinese:'黑客与画家\n本质上是同一类人', english:"What hackers and painters have in common is that they're both makers.", context:'编程不是科学是工艺。正如画家画布上的笔触，代码也是逐渐变好的草图', tint:[125,150,170] },
+  { name:'传承', chinese:'找你自己真正遇到的问题\n而不是努力想创业点子', english:'The way to get startup ideas is to look for problems, not startup ideas.', context:'1964– · YC从8家公司到3000+。给下一代创始人的礼物是勇气，不是蓝图', tint:[140,165,185] },
+];
+
+/* ── Einstein 8-Stage Narrative ── */
+const EINSTEIN_STAGES = [
+  { name:'初心', chinese:'五岁时指南针让我颤抖\n看不见的力推动可见的世界', english:'The most beautiful experience we can have is the mysterious.', context:'1879年生 · 乌尔姆 — 父亲送他指南针，母亲教他小提琴。两种激情：物理与音乐', tint:[160,220,255] },
+  { name:'追光', chinese:'如果追着一束光跑\n会看到什么', english:'What would I see if I rode on a beam of light?', context:'16岁思想实验 — 这个看似天真的问题，最终导向狭义相对论', tint:[140,210,255] },
+  { name:'奇迹', chinese:'想象力比知识更重要\n知识有限，想象包容整个世界', english:'Imagination is more important than knowledge. Knowledge is limited.', context:'1905 · 奇迹年 — 四篇论文颠覆物理学：光电效应、布朗运动、狭义相对论、E=mc²', tint:[130,200,250] },
+  { name:'弯曲', chinese:'时空告诉物质如何运动\n物质告诉时空如何弯曲', english:'Spacetime tells matter how to move; matter tells spacetime how to curve.', context:'1915 · 广义相对论 — 引力不是力，是时空的几何。优美到必须是正确的', tint:[120,195,245] },
+  { name:'上帝', chinese:'上帝不掷骰子\n但也许祂更神秘', english:'God does not play dice with the universe.', context:'1927 · 索尔维会议 — 与玻尔争论量子力学。不是不信，是不信它是终极答案', tint:[145,215,255] },
+  { name:'孤独', chinese:'我从未真正属于\n任何地方任何人', english:'I am truly a lone traveler and have never belonged anywhere with all my heart.', context:'1933 · 逃离纳粹→普林斯顿。后半生独自追寻统一场论，30年未果。孤独是清醒的代价', tint:[110,190,240] },
+  { name:'和平', chinese:'第三次世界大战用什么我不知道\n但第四次会用棍棒和石头', english:'I know not with what weapons WWIII will be fought, but WWIV will be fought with sticks and stones.', context:'1939 · 致罗斯福的信推动原子弹研发，余生为和平奔走。知识是力量也是责任', tint:[130,205,250] },
+  { name:'前行', chinese:'重要的是不要停止提问\n好奇心自有其存在的理由', english:'The important thing is not to stop questioning.', context:'1879–1955 · 相对论、E=mc²、光子假说。我们皆因好奇而生，因惊奇而活', tint:[140,210,255] },
+];
+
+/* ── Da Vinci 8-Stage Narrative ── */
+const DAVINCI_STAGES = [
+  { name:'初心', chinese:'我们的一切知识\n都始于感官', english:'All our knowledge has its origins in our perceptions.', context:'1452年生 · 芬奇小镇 — 私生子无正规教育。「野孩子」的观察力是他最宝贵的财富', tint:[235,210,160] },
+  { name:'观察', chinese:'描述啄木鸟舌头的结构\n是理解自然的钥匙', english:'Describe the tongue of the woodpecker.', context:'一切从观察开始：水的漩涡、鸟的飞行、人体肌肉。不描述就无法理解', tint:[240,206,150] },
+  { name:'跨界', chinese:'艺术与科学不是两个世界\n是同一世界的两种语言', english:'Study the science of art. Study the art of science.', context:'蒙娜丽莎+解剖学+飞行器+水利工程。不是多才多艺，是他从未看到学科之间的边界', tint:[245,200,145] },
+  { name:'好奇', chinese:'我没有任何特殊才能\n只是无比好奇', english:'I have no special talents. I am only passionately curious.', context:'7200页手稿记录他问过的每一个问题。不为发表，纯粹为满足自己的好奇心', tint:[235,210,155] },
+  { name:'未竟', chinese:'完成的画作极少\n但每一件都改变了艺术史', english:'Art is never finished, only abandoned.', context:'拖延不是懒惰，是对完美的执念。《蒙娜丽莎》画了16年。未完成本身是一种宣言', tint:[230,195,140] },
+  { name:'解剖', chinese:'了解人体内部\n才能画出真正的生命', english:'The human foot is a masterpiece of engineering and a work of art.', context:'解剖30+具尸体，绘制200+幅解剖图。要画活人，必须先理解死者的结构', tint:[245,202,148] },
+  { name:'飞行', chinese:'一旦尝过飞行的滋味\n你将永远仰望天空', english:'Once you have tasted flight, you will forever walk the earth with your eyes turned skyward.', context:'飞行器设计超前400年。不是科幻幻想，是基于鸟类飞行严密观察画出的工程图', tint:[238,208,152] },
+  { name:'传承', chinese:'简约\n是终极的精致', english:'Simplicity is the ultimate sophistication.', context:'1452–1519 · 人类历史上好奇心最广的人。好奇心没有边界', tint:[240,206,150] },
+];
+
+/* ── 张一鸣 8-Stage Narrative ── */
+const ZHANGYIMING_STAGES = [
+  { name:'初心', chinese:'四次创业三次失败\n但每一次都在积累算法', english:'创业就像做算法题，多做几次你就知道最优解长什么样。', context:'南开大学→酷讯→饭否→九九房→字节跳动。前三次失败是训练数据', tint:[90,150,210] },
+  { name:'算法', chinese:'推荐引擎不是替代你思考\n而是比你更懂你要什么', english:'信息分发的本质，是把正确的内容在正确的时间推给正确的人。', context:'2012 · 今日头条 — 不是人找信息，是信息找人。机器学习替代人工编辑', tint:[80,140,200] },
+  { name:'延迟', chinese:'延迟满足感\n是人生最重要的能力', english:'很多人人生中一半的问题，都是因为没有延迟满足感造成的。', context:'字节跳动的核心文化。不做短期见效的事，做有长期复利的事', tint:[75,135,195] },
+  { name:'大力', chinese:'大力出奇迹\n不是蛮力，是压强', english:'在重要的点上，投入远超过对手的资源。不需要在所有地方赢，关键地方必须赢。', context:'2016 · 抖音上线 — 在短视频赛道投入全部资源，用极致压强撕开市场', tint:[85,145,205] },
+  { name:'全球', chinese:'全球化不是翻译\n是原生生长', english:'A product can be born global. You don\'t have to start local and expand.', context:'2017 · TikTok出海 — 不是把抖音翻译成英文，是在每个市场从零生长。去中国化', tint:[70,130,190] },
+  { name:'危机', chinese:'风暴来的时候\n平常心是唯一的锚', english:'面对巨大的不确定性，最重要的不是战术调整，而是保持内心的平静。', context:'2020 · 地缘博弈 — TikTok面临封禁。在不可控面前，控制可控的', tint:[65,125,185] },
+  { name:'退隐', chinese:'急流勇退\n把舞台交给下一代', english:'我相信比我年轻的人能做更好。一个组织不能永远依赖创始人。', context:'2021 · 卸任CEO — 不恋栈不退缩。把公司交给更年轻的管理层', tint:[80,140,200] },
+  { name:'前行', chinese:'平常心\n做非常事', english:'Stay calm, stay focused, and always look beyond the immediate horizon.', context:'1983– · 从推荐算法到全球最大AI驱动内容平台。延迟满足是这个时代最稀缺的品质', tint:[90,145,210] },
+];
+
+/* ── 孙宇晨 8-Stage Narrative ── */
+const SUNYUCHEN_STAGES = [
+  { name:'初心', chinese:'北大→宾大\n读书是改变命运的第一杠杆', english:'教育是唯一不需要任何资本的杠杆。', context:'惠州→北大历史系→宾大法学硕士。每一步都在积累叙事资本', tint:[250,185,50] },
+  { name:'入场', chinese:'注意力即财富\n没有人注意你，你就不存在', english:'In crypto, silence is not golden. Silence is invisible.', context:'2017 · 波场TRON创立 — 用营销颠覆技术叙事。最会讲故事的创始人', tint:[255,175,30] },
+  { name:'争议', chinese:'不争议\n不传奇', english:'如果你做的事没有人骂，说明你做的东西不够有趣。', context:'巴菲特午餐456万$、收购Steemit、Mars Protocol。每次争议都是免费全球曝光', tint:[250,170,25] },
+  { name:'扩张', chinese:'收购不是目的\n叙事收购才是', english:'Every acquisition is about the story, not just the tech.', context:'BitTorrent、Poloniex、HTX。把去中心化的故事不断延续', tint:[255,180,35] },
+  { name:'风暴', chinese:'每一次SEC警告\n都是一次压力测试', english:'当监管来找你时，他们其实在帮你验证你的影响力。', context:'SEC起诉、HTX黑客事件、USDD脱锚。每次死不了，每次活过来都更强', tint:[245,165,20] },
+  { name:'反弹', chinese:'跌倒了就再站起来\n最差的结果不过是重生', english:'I don\'t lose. I either win or learn.', context:'波场市值从低谷到新高，HTX从被黑到重生。反脆弱不是理论是实践', tint:[255,172,28] },
+  { name:'帝国', chinese:'去中心化的金融帝国\n不需要地理边界', english:'The future of finance doesn\'t have an address. It has a protocol.', context:'波场生态：TRX、USDD、HTX、BitTorrent。构建无国界金融网络', tint:[250,178,32] },
+  { name:'前行', chinese:'所有伟大故事的主角\n都曾被低估', english:"If they're not laughing at you, you're not aiming high enough.", context:'1990– · 从「巴菲特午餐男孩」到加密帝国。注意力是新时代的货币', tint:[255,175,30] },
+];
+
 /* primitive helper — p(type, {...}) */
 function p(type, o) { return Object.assign({ type, n: 30, a: 0.7, c: [225,233,246] }, o); }
 
@@ -744,7 +852,7 @@ class ParticleMorph {
     const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
       taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
       pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
-      zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+      zhangyiming: ZHANGYIMING_STAGES, sunyuchen: SUNYUCHEN_STAGES };
     const table = stageTables[this.key];
     return (table && table[idx]) ? table[idx].tint : null;
   }
@@ -772,7 +880,7 @@ class ParticleMorph {
       const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
         taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
         pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
-        zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+        zhangyiming: ZHANGYIMING_STAGES, sunyuchen: SUNYUCHEN_STAGES };
       const table = stageTables[this.key];
       const stageMeta = table ? table[next] : null;
       this.onStageChange(next, stageMeta);
@@ -907,7 +1015,7 @@ function updateStageDots(idx) {
   const stageTables = { jobs: JOB_STAGES, munger: MUNGER_STAGES, feynman: FEYNMAN_STAGES,
     taleb: TALEB_STAGES, musk: MUSK_STAGES, naval: NAVAL_STAGES,
     pg: PG_STAGES, einstein: EINSTEIN_STAGES, davinci: DAVINCI_STAGES,
-    zhangyiming: ZYM_STAGES, sunyuchen: SUN_STAGES };
+    zhangyiming: ZHANGYIMING_STAGES, sunyuchen: SUNYUCHEN_STAGES };
   const table = stageTables[selectedCompanion];
   const total = table ? table.length : 3;
   let html = '';

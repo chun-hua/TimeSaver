@@ -3,11 +3,10 @@ package com.ttime.wanliu.ui.screens
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
@@ -36,6 +35,7 @@ fun CreateScreen(
     val config = state.config
     var showCustomDur by remember { mutableStateOf(config.isCustomDuration) }
     var customMin by remember { mutableStateOf(config.customDurationMinutes.toString()) }
+    var showCompanionPicker by remember { mutableStateOf(false) }
 
     Box(
         modifier = Modifier
@@ -62,109 +62,120 @@ fun CreateScreen(
                 )
             )
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .verticalScroll(rememberScrollState())
-                .padding(horizontal = 28.dp)
-                .padding(top = 64.dp, bottom = 40.dp),
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 28.dp, top = 64.dp, end = 28.dp, bottom = 40.dp),
             horizontalAlignment = Alignment.Start
         ) {
-            HeaderSection()
+            item { HeaderSection() }
 
-            Spacer(modifier = Modifier.height(34.dp))
+            item { Spacer(modifier = Modifier.height(34.dp)) }
 
-            TaskInputSection(
-                value = config.taskName,
-                onValueChange = { viewModel.updateTaskName(it) }
-            )
+            item {
+                TaskInputSection(
+                    value = config.taskName,
+                    onValueChange = { viewModel.updateTaskName(it) }
+                )
+            }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            item { Spacer(modifier = Modifier.height(28.dp)) }
 
-            DurationSection(
-                selectedMinutes = if (config.isCustomDuration) 0 else config.durationMinutes,
-                showCustom = showCustomDur,
-                customValue = customMin,
-                onSelect = { mins ->
-                    if (mins == 0) {
-                        showCustomDur = true
-                        viewModel.updateDuration(mins, isCustom = true)
-                    } else {
-                        showCustomDur = false
-                        viewModel.updateDuration(mins, isCustom = false)
+            item {
+                DurationSection(
+                    selectedMinutes = if (config.isCustomDuration) 0 else config.durationMinutes,
+                    showCustom = showCustomDur,
+                    customValue = customMin,
+                    onSelect = { mins ->
+                        if (mins == 0) {
+                            showCustomDur = true
+                            viewModel.updateDuration(mins, isCustom = true)
+                        } else {
+                            showCustomDur = false
+                            viewModel.updateDuration(mins, isCustom = false)
+                        }
+                    },
+                    onCustomValueChange = { v ->
+                        customMin = v
+                        v.toIntOrNull()?.let { viewModel.updateCustomDuration(it) }
                     }
-                },
-                onCustomValueChange = { v ->
-                    customMin = v
-                    v.toIntOrNull()?.let { viewModel.updateCustomDuration(it) }
-                }
-            )
+                )
+            }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            item { Spacer(modifier = Modifier.height(28.dp)) }
 
-            StyleSection(
-                selectedStyle = config.timeWindowStyle,
-                onStyleSelect = { viewModel.updateTimeWindowStyle(it) }
-            )
+            item {
+                StyleSection(
+                    selectedStyle = config.timeWindowStyle,
+                    onStyleSelect = { viewModel.updateTimeWindowStyle(it) }
+                )
+            }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            item { Spacer(modifier = Modifier.height(28.dp)) }
 
-            ThemeSection(
-                selectedTheme = config.backgroundTheme,
-                onThemeSelect = { viewModel.updateBackgroundTheme(it) }
-            )
+            item {
+                ThemeSection(
+                    selectedTheme = config.backgroundTheme,
+                    onThemeSelect = { viewModel.updateBackgroundTheme(it) }
+                )
+            }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            item { Spacer(modifier = Modifier.height(28.dp)) }
 
-            CompanionSection(
-                selectedId = config.companionId,
-                onSelect = { viewModel.updateCompanion(it) }
-            )
+            item {
+                CompanionSection(
+                    selectedId = config.companionId,
+                    expanded = showCompanionPicker,
+                    onExpandedChange = { showCompanionPicker = it },
+                    onSelect = { viewModel.updateCompanion(it) }
+                )
+            }
 
-            Spacer(modifier = Modifier.height(28.dp))
+            item { Spacer(modifier = Modifier.height(28.dp)) }
 
-            Button(
-                onClick = {
-                    if (config.taskName.isBlank()) {
-                        viewModel.updateTaskName("专注任务")
-                    }
-                    onStartFocus()
-                    viewModel.startFocus()
-                },
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(52.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = Color.Transparent
-                ),
-                contentPadding = PaddingValues(0.dp)
-            ) {
-                Box(
+            item {
+                Button(
+                    onClick = {
+                        if (config.taskName.isBlank()) {
+                            viewModel.updateTaskName("专注任务")
+                        }
+                        onStartFocus()
+                        viewModel.startFocus()
+                    },
                     modifier = Modifier
-                        .fillMaxSize()
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            Brush.horizontalGradient(listOf(PurplePrimary, IndigoDeep))
-                        ),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .height(52.dp),
+                    shape = RoundedCornerShape(16.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color.Transparent
+                    ),
+                    contentPadding = PaddingValues(0.dp)
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.horizontalGradient(listOf(PurplePrimary, IndigoDeep))
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = Icons.Filled.PlayArrow,
-                            contentDescription = null,
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            text = "进入专注空间",
-                            style = ButtonTextStyle,
-                            color = Color.White,
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = Icons.Filled.PlayArrow,
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(18.dp)
+                            )
+                            Spacer(modifier = Modifier.width(10.dp))
+                            Text(
+                                text = "进入专注空间",
+                                style = ButtonTextStyle,
+                                color = Color.White,
+                            )
+                        }
                     }
                 }
             }
@@ -423,8 +434,13 @@ private fun StyleSection(
 @Composable
 private fun CompanionSection(
     selectedId: String,
+    expanded: Boolean,
+    onExpandedChange: (Boolean) -> Unit,
     onSelect: (String) -> Unit
 ) {
+    val selectedCompanion = companionById(selectedId)
+    val selectedLabel = selectedCompanion?.name ?: "独自专注"
+
     Column(modifier = Modifier.fillMaxWidth()) {
         Row(verticalAlignment = Alignment.CenterVertically) {
             SectionLabel(Icons.Filled.Person, "陪伴者")
@@ -442,9 +458,38 @@ private fun CompanionSection(
             color = InkFaint,
             modifier = Modifier.padding(bottom = 12.dp)
         )
-        CompanionPicker(
-            selectedId = selectedId,
-            onSelect = onSelect
-        )
+        OutlinedButton(
+            onClick = { onExpandedChange(!expanded) },
+            modifier = Modifier.fillMaxWidth(),
+            shape = RoundedCornerShape(14.dp),
+            colors = ButtonDefaults.outlinedButtonColors(
+                contentColor = InkSoft
+            )
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Text(
+                    text = "已选择：$selectedLabel",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = InkSoft
+                )
+                Icon(
+                    imageVector = if (expanded) Icons.Filled.KeyboardArrowUp else Icons.Filled.KeyboardArrowDown,
+                    contentDescription = null,
+                    tint = InkFaint,
+                    modifier = Modifier.size(18.dp)
+                )
+            }
+        }
+        if (expanded) {
+            Spacer(modifier = Modifier.height(12.dp))
+            CompanionPicker(
+                selectedId = selectedId,
+                onSelect = onSelect
+            )
+        }
     }
 }

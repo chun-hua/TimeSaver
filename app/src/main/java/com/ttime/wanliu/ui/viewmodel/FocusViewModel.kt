@@ -175,7 +175,7 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
                     )
                 }
             }
-            if (_state.value.remainingSeconds == 0) {
+            if (_state.value.remainingSeconds == 0 && _state.value.isFocusActive) {
                 completeFocus()
             }
         }
@@ -183,8 +183,19 @@ class FocusViewModel(application: Application) : AndroidViewModel(application) {
 
     private fun completeFocus() {
         val s = _state.value
+        val finalElapsed = s.totalSeconds.coerceAtLeast(s.elapsedSeconds)
+        focusTimerJob = null
+        _state.value = s.copy(
+            isFocusActive = false,
+            remainingSeconds = 0,
+            elapsedSeconds = finalElapsed,
+            exitStep = ExitStep.NONE,
+            exitReason = "",
+            coolDownSeconds = 0,
+            coolDownActive = false
+        )
         viewModelScope.launch {
-            dao.finishSession(s.sessionId, s.elapsedSeconds, completed = true)
+            dao.finishSession(s.sessionId, finalElapsed, completed = true)
         }
     }
 

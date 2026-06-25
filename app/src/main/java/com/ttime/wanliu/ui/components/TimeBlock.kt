@@ -19,6 +19,7 @@ import androidx.compose.ui.draw.scale
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -40,23 +41,23 @@ fun TimeBlock(
 
     // ── 三层呼吸动画 ──
 
-    // 1. 卡片整体缩放（极轻微，~1.5%）
+    // 1. 卡片整体缩放：慢速轻呼吸，避免明显跳动
     val cardScale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.014f,
+        initialValue = 0.998f,
+        targetValue = 1.006f,
         animationSpec = infiniteRepeatable(
-            animation = tween(4000, easing = EaseInOutCubic),
+            animation = tween(6800, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "cardScale"
     )
 
-    // 2. 外圈辉光强度（更明显的明暗变化）
+    // 2. 外圈辉光强度：低幅度慢明暗变化
     val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.06f,
-        targetValue = 0.32f,
+        initialValue = 0.10f,
+        targetValue = 0.20f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3500, easing = EaseInOutCubic),
+            animation = tween(7200, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "glowAlpha"
@@ -65,9 +66,9 @@ fun TimeBlock(
     // 3. 边框 + accent 线辉光
     val borderGlow by infiniteTransition.animateFloat(
         initialValue = 0.06f,
-        targetValue = 0.14f,
+        targetValue = 0.13f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3200, easing = EaseInOutCubic),
+            animation = tween(6200, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "borderGlow"
@@ -75,10 +76,10 @@ fun TimeBlock(
 
     // 4. 鼓励语淡入淡出
     val breatheAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.45f,
-        targetValue = 0.92f,
+        initialValue = 0.58f,
+        targetValue = 0.84f,
         animationSpec = infiniteRepeatable(
-            animation = tween(2800, easing = EaseInOutCubic),
+            animation = tween(5600, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "breathe"
@@ -86,10 +87,10 @@ fun TimeBlock(
 
     // 5. accent 线宽度呼吸
     val accentWidth by infiniteTransition.animateFloat(
-        initialValue = 0.45f,
-        targetValue = 0.62f,
+        initialValue = 0.46f,
+        targetValue = 0.58f,
         animationSpec = infiniteRepeatable(
-            animation = tween(3800, easing = EaseInOutCubic),
+            animation = tween(7000, easing = EaseInOutCubic),
             repeatMode = RepeatMode.Reverse
         ),
         label = "accentW"
@@ -111,24 +112,33 @@ fun TimeBlock(
 
         else -> Modifier
             .shadow(
-                elevation = 20.dp,
-                shape = RoundedCornerShape(28.dp),
-                ambientColor = PurplePrimary.copy(alpha = glowAlpha),
-                spotColor = PurplePrimary.copy(alpha = glowAlpha * 0.6f)
+                elevation = 30.dp,
+                shape = RoundedCornerShape(32.dp),
+                ambientColor = PurplePrimary.copy(alpha = glowAlpha * 0.88f),
+                spotColor = PurpleLight.copy(alpha = glowAlpha * 0.62f)
             )
-            .clip(RoundedCornerShape(28.dp))
-            .background(Color(0x9E080814))
-            .border(1.dp, Color.White.copy(alpha = 0.07f + borderGlow), RoundedCornerShape(28.dp))
+            .clip(RoundedCornerShape(32.dp))
+            .background(Color(0x72070A16))
+            .background(
+                Brush.verticalGradient(
+                    listOf(
+                        Color.White.copy(alpha = 0.105f + borderGlow * 0.22f),
+                        Color.White.copy(alpha = 0.020f),
+                        Color.Black.copy(alpha = 0.12f)
+                    )
+                )
+            )
+            .border(1.dp, Color.White.copy(alpha = 0.12f + borderGlow), RoundedCornerShape(32.dp))
     }
 
     val textColor = if (isNoteStyle) Color(0xFF1A1A2E) else InkWhite
     val faintColor = if (isNoteStyle) Color(0xFF5C5340) else InkFaint
     val softColor = if (isNoteStyle) Color(0xFF3A3328) else InkSoft
-    val progressTrack = if (isNoteStyle) Color(0xFFD4C388) else Color.White.copy(alpha = 0.1f)
+    val progressTrack = if (isNoteStyle) Color(0xFFD4C388) else Color.White.copy(alpha = 0.12f + borderGlow * 0.24f)
     val progressFill = if (isNoteStyle)
         Brush.horizontalGradient(listOf(Color(0xFF8B6914), Color(0xFFC4A44A)))
     else
-        Brush.horizontalGradient(listOf(PurplePrimary, PurpleLight))
+        Brush.horizontalGradient(listOf(PurplePrimary, PurpleLight, Color(0xFFE9D5FF)))
     val iconBg = if (isNoteStyle) Color(0xFFD4C388).copy(alpha = 0.2f) else PurplePrimary.copy(alpha = 0.18f + borderGlow * 0.8f)
     val iconTint = if (isNoteStyle) Color(0xFF8B6914) else PurpleLight
 
@@ -140,6 +150,33 @@ fun TimeBlock(
             .then(blockModifier),
         contentAlignment = Alignment.Center
     ) {
+        if (!isMinimal && !isNoteStyle) {
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                PurpleLight.copy(alpha = 0.16f + glowAlpha * 0.18f),
+                                PurplePrimary.copy(alpha = 0.045f),
+                                Color.Transparent
+                            ),
+                            center = Offset(115f, 0f),
+                            radius = 430f
+                        )
+                    )
+            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .padding(1.dp)
+                    .border(
+                        width = 0.6.dp,
+                        color = Color.White.copy(alpha = 0.08f + borderGlow * 0.36f),
+                        shape = RoundedCornerShape(31.dp)
+                    )
+            )
+        }
         Column(
             modifier = Modifier.padding(horizontal = 32.dp, vertical = 28.dp),
             horizontalAlignment = Alignment.CenterHorizontally
@@ -154,7 +191,9 @@ fun TimeBlock(
                             Brush.horizontalGradient(
                                 listOf(
                                     Color.Transparent,
-                                    PurpleLight.copy(alpha = 0.25f + borderGlow * 2.5f),
+                                    PurpleLight.copy(alpha = 0.36f + borderGlow * 2.2f),
+                                    Color.White.copy(alpha = 0.38f + glowAlpha * 0.32f),
+                                    PurplePrimary.copy(alpha = 0.22f + borderGlow),
                                     Color.Transparent
                                 )
                             )

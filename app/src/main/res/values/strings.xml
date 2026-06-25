@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">挽留者</string>
+    <string name="app_name">留时</string>
     <string name="create_title">创建专注空间</string>
     <string name="task_hint">例如：写论文 introduction</string>
     <string name="duration_label">专注时长</string>
@@ -24,6 +24,6 @@
     <string name="emergency_message">无论发生什么，都照顾好自己。专注空间随时都在，等你回来。</string>
     <string name="go_home">回到主页</string>
     <string name="lock_screen">锁屏专注</string>
-    <string name="device_admin_label">挽留者锁屏</string>
+    <string name="device_admin_label">留时锁屏</string>
     <string name="device_admin_description">授权后，「锁屏专注」可以立即熄屏并锁定手机。亮屏时专注页会停留在锁屏之上，需先退出才能进入手机。</string>
 </resources>

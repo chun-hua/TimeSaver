@@ -30,6 +30,10 @@ fun themeImageUrl(themeId: String, full: Boolean): String {
         "cyber" -> "photo-1536599018102-9f803c140fc1"
         else -> "photo-1519692933481-e162a57d6721"
     }
-    val query = if (full) "w=1920&q=80" else "w=500&q=70"
+    val query = if (full) {
+        "w=1920&q=80&auto=format"
+    } else {
+        "w=520&h=220&fit=crop&q=60&auto=format"
+    }
     return "https://images.unsplash.com/$photoId?$query"
 }
